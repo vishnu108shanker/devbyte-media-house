@@ -1,29 +1,30 @@
 import Link from "next/link";
+import ArchitectureExplorer, { StageDetail } from "@/components/explore/ArchitectureExplorer";
 
 export default function HowItWorksPage() {
-  const stages = [
+  const stages: StageDetail[] = [
     {
       id: "discovery",
       num: "01",
       name: "Content Discovery",
       tagline: "4 Independent Ingestion Streams",
       description:
-        "Continuously collects raw developer activity, open-source releases, and infrastructure announcements across disparate protocols and formats.",
-      details: [
+        "Continuously collects raw developer activity, releases, and infrastructure announcements across disparate protocols and formats.",
+      components: [
         {
-          name: "Hacker News",
-          type: "Official JSON API",
-          role: "Top stories stream with upvote and discussion signal tracking.",
+          name: "Hacker News API",
+          type: "JSON REST",
+          role: "Polls top stories and comments with score and discussion velocity tracking.",
         },
         {
-          name: "Official Engineering Blogs",
+          name: "Engineering Blogs",
           type: "RSS / Atom Feeds",
           role: "Direct newsrooms from OpenAI, Anthropic, Google DeepMind, Meta, and AWS.",
         },
         {
           name: "GitHub Releases",
-          type: "REST API v3",
-          role: "Latest releases, major semantic versions, and changelogs from top developer repositories.",
+          type: "GitHub REST API",
+          role: "Major version releases and changelogs from tracked developer infrastructure repos.",
         },
         {
           name: "Product Hunt",
@@ -31,16 +32,19 @@ export default function HowItWorksPage() {
           role: "Curated developer tools, productivity software, and AI infrastructure launches.",
         },
       ],
-      badgeColor: "text-blue-400 border-blue-500/30 bg-blue-500/10",
+      hardInvariants: [
+        "All collectors run independently; failure of one collector does not abort the batch.",
+        "Payloads are stored with original source timestamps and source URI for provenance.",
+      ],
     },
     {
-      id: "ingestion",
+      id: "filtering",
       num: "02",
       name: "Ingestion & Filter Cascade",
       tagline: "Deterministic Hard Gates",
       description:
-        "Before any LLM token is spent, candidates pass through five strict rule-based filters that strip tutorials, opinion pieces, stale items, and duplicates.",
-      details: [
+        "Before any LLM token is consumed, candidates pass through five strict rule-based filters that strip tutorials, opinion pieces, stale items, and duplicates.",
+      components: [
         {
           name: "Normalizer",
           type: "Schema Uniformity",
@@ -67,7 +71,10 @@ export default function HowItWorksPage() {
           role: "Discards any announcement older than 14 days to guarantee news freshness.",
         },
       ],
-      badgeColor: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+      hardInvariants: [
+        "Deterministic filters reject noise with 0 LLM token cost.",
+        "Historical deduplicator checks previous publications to prevent duplicate video generation.",
+      ],
     },
     {
       id: "intelligence",
@@ -76,7 +83,7 @@ export default function HowItWorksPage() {
       tagline: "Two-Pass Gemini Judgment",
       description:
         "Replaces arbitrary arithmetic scoring formulas with factual evidence compilation, two-pass LLM judgment, and structural validation.",
-      details: [
+      components: [
         {
           name: "Evidence Builder",
           type: "Facts Over Points",
@@ -103,7 +110,10 @@ export default function HowItWorksPage() {
           role: "Caches evaluations; triggers instant re-evaluation if an item's points surge by >50%.",
         },
       ],
-      badgeColor: "text-purple-400 border-purple-500/30 bg-purple-500/10",
+      hardInvariants: [
+        "LLM temperature set to 0.0 for stability heuristic; structured JSON schema enforced.",
+        "Automated self-healing retries with model fallbacks (gemini-2.5-flash, gemini-3.5-flash).",
+      ],
     },
     {
       id: "production",
@@ -112,7 +122,7 @@ export default function HowItWorksPage() {
       tagline: "100% Host CPU Saturation",
       description:
         "High-throughput vertical video generation combining neural speech synthesis, spring physics, and hardware-accelerated Remotion rendering.",
-      details: [
+      components: [
         {
           name: "Concurrent Pre-Production",
           type: "Gemini + Edge TTS",
@@ -134,7 +144,10 @@ export default function HowItWorksPage() {
           role: "Rotating tech themes (zap, neural core, rocket, sparkle) with active narration glow effects.",
         },
       ],
-      badgeColor: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+      hardInvariants: [
+        "Scene boundaries are contiguous with zero audio-visual drift.",
+        "Isolated worker directories prevent race conditions during concurrent batch runs.",
+      ],
     },
     {
       id: "publishing",
@@ -143,7 +156,7 @@ export default function HowItWorksPage() {
       tagline: "Ephemeral S3 Bridge & Triple Broadcast",
       description:
         "Simultaneously broadcasts finished video assets to major video platforms without retaining unnecessary cloud storage.",
-      details: [
+      components: [
         {
           name: "YouTube Shorts",
           type: "Resumable Upload",
@@ -170,152 +183,77 @@ export default function HowItWorksPage() {
           role: "Deletes the temporary S3 asset immediately after Instagram and Facebook acknowledge completion.",
         },
       ],
-      badgeColor: "text-pink-400 border-pink-500/30 bg-pink-500/10",
+      hardInvariants: [
+        "Zero permanent cloud video storage: S3 assets deleted automatically after Meta ingestion.",
+        "Append-only publication record written to PostgreSQL (EC2) and MongoDB Atlas archive.",
+      ],
     },
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
       {/* Header */}
       <div className="max-w-3xl">
-        <span className="font-mono text-xs uppercase tracking-wider text-indigo-400">
-          Architecture Specification
+        <span className="font-mono text-xs uppercase tracking-wider text-blue-400 font-semibold">
+          System Architecture
         </span>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-100">
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-100 font-mono">
           How DevByte Works
         </h1>
-        <p className="mt-4 text-base sm:text-lg text-zinc-400 leading-relaxed">
-          DevByte Engine transforms raw developer activity into high-fidelity short-form videos through an autonomous 5-stage pipeline designed for deterministic reliability and maximum CPU saturation.
+        <p className="mt-4 text-sm sm:text-base text-zinc-400 leading-relaxed">
+          DevByte Engine transforms raw developer activity into high-fidelity short-form videos through an autonomous 5-stage pipeline designed for deterministic reliability, hardware saturation, and zero cloud waste.
         </p>
       </div>
 
-      {/* Visual High-Level Architecture Flowchart */}
-      <div className="mt-12 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-8 backdrop-blur-sm">
-        <h2 className="text-sm font-mono uppercase tracking-wider text-zinc-400">
-          System Architecture &amp; Data Flow
-        </h2>
+      {/* Interactive Architecture Explorer */}
+      <ArchitectureExplorer stages={stages} />
 
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-5">
-          {stages.map((stage, idx) => (
-            <div key={stage.id} className="relative flex flex-col justify-between rounded-xl border border-zinc-800 bg-zinc-950/80 p-4">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-zinc-500">{stage.num}</span>
-                  <span className={`rounded border px-1.5 py-0.2 font-mono text-[9px] ${stage.badgeColor}`}>
-                    STAGE {idx + 1}
-                  </span>
-                </div>
-                <h3 className="mt-3 text-sm font-semibold text-zinc-100">{stage.name}</h3>
-                <p className="mt-1 text-xs text-zinc-400">{stage.tagline}</p>
-              </div>
-
-              {idx < stages.length - 1 && (
-                <div className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 z-10 text-zinc-600 font-mono text-sm">
-                  →
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Detailed Stage-by-Stage Breakdown */}
-      <div className="mt-16 space-y-12">
-        {stages.map((stage) => (
-          <section
-            key={stage.id}
-            id={stage.id}
-            className="rounded-2xl border border-zinc-800/90 bg-zinc-900/30 p-6 sm:p-8 transition hover:border-zinc-700"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between border-b border-zinc-800/80 pb-6 gap-2">
-              <div className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 font-mono text-sm font-bold text-indigo-400">
-                  {stage.num}
-                </span>
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-zinc-100">
-                    {stage.name}
-                  </h2>
-                  <span className="text-xs font-mono text-indigo-400">
-                    {stage.tagline}
-                  </span>
-                </div>
-              </div>
-              <p className="text-xs sm:text-sm text-zinc-400 max-w-md">
-                {stage.description}
-              </p>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {stage.details.map((detail) => (
-                <div
-                  key={detail.name}
-                  className="rounded-xl border border-zinc-800/80 bg-zinc-950/60 p-4 transition hover:bg-zinc-950"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-zinc-200">
-                      {detail.name}
-                    </span>
-                    <span className="font-mono text-[10px] text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                      {detail.type}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-                    {detail.role}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-
-      {/* Performance Visibility Section */}
-      <div className="mt-16 rounded-2xl border border-zinc-800 bg-zinc-950 p-6 sm:p-8">
+      {/* Telemetry & Performance Instrumentation */}
+      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-sm">
         <div className="max-w-2xl">
-          <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
+          <span className="font-mono text-xs uppercase tracking-wider text-amber-400 font-semibold">
             Telemetry &amp; Instrumentation
           </span>
-          <h2 className="mt-2 text-2xl font-bold text-zinc-100">
+          <h2 className="mt-1 text-2xl font-bold text-zinc-100">
             Real-Time Pipeline Performance
           </h2>
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="mt-2 text-xs sm:text-sm text-zinc-400">
             The orchestrator measures every micro-phase in milliseconds, emitting visual ASCII timing reports for terminal operators and pushing metrics to the presentation archive.
           </p>
         </div>
 
-        <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/90 p-5 font-mono text-xs text-zinc-300 overflow-x-auto shadow-inner">
+        <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-5 font-mono text-xs text-zinc-300 overflow-x-auto">
           <div className="text-amber-400 font-bold mb-2">
             ⏱️ PERFORMANCE REPORT: &quot;NVIDIA to Acquire Hugging Face&quot;
           </div>
-          <div className="text-zinc-600">────────────────────────────────────────────────────────────</div>
-          <div className="py-0.5"><span className="text-zinc-400">Gemini Script  </span>:  6.2s  <span className="text-indigo-400">█</span></div>
-          <div className="py-0.5"><span className="text-zinc-400">Validator      </span>:  0.2s</div>
-          <div className="py-0.5"><span className="text-zinc-400">TTS Voice      </span>:  4.1s  <span className="text-indigo-400">█</span></div>
-          <div className="py-0.5"><span className="text-zinc-400">Remotion Render</span>: 58.4s  <span className="text-indigo-400">████████████████████</span> (100% CPU)</div>
-          <div className="py-0.5"><span className="text-zinc-400">YT Upload      </span>: 18.2s  <span className="text-indigo-400">██████</span></div>
-          <div className="py-0.5"><span className="text-zinc-400">S3 Temp Upload </span>:  4.3s  <span className="text-indigo-400">█</span></div>
-          <div className="py-0.5"><span className="text-zinc-400">IG Upload      </span>: 26.5s  <span className="text-indigo-400">█████████</span></div>
-          <div className="py-0.5"><span className="text-zinc-400">FB Upload      </span>: 24.1s  <span className="text-indigo-400">████████</span></div>
-          <div className="text-zinc-600">────────────────────────────────────────────────────────────</div>
-          <div className="text-emerald-400 font-bold mt-1"><span className="text-zinc-300">Total Pipeline </span>: 142.0s</div>
+          <div className="text-zinc-700">────────────────────────────────────────────────────────────</div>
+          <div className="py-0.5"><span className="text-zinc-500">Gemini Script  </span>:  6.2s  <span className="text-blue-400">█</span></div>
+          <div className="py-0.5"><span className="text-zinc-500">Validator      </span>:  0.2s</div>
+          <div className="py-0.5"><span className="text-zinc-500">TTS Voice      </span>:  4.1s  <span className="text-blue-400">█</span></div>
+          <div className="py-0.5"><span className="text-zinc-500">Remotion Render</span>: 58.4s  <span className="text-blue-400">████████████████████</span> (100% CPU)</div>
+          <div className="py-0.5"><span className="text-zinc-500">YT Upload      </span>: 18.2s  <span className="text-blue-400">██████</span></div>
+          <div className="py-0.5"><span className="text-zinc-500">S3 Temp Upload </span>:  4.3s  <span className="text-blue-400">█</span></div>
+          <div className="py-0.5"><span className="text-zinc-500">IG Upload      </span>: 26.5s  <span className="text-blue-400">█████████</span></div>
+          <div className="py-0.5"><span className="text-zinc-500">FB Upload      </span>: 24.1s  <span className="text-blue-400">████████</span></div>
+          <div className="text-zinc-700">────────────────────────────────────────────────────────────</div>
+          <div className="text-emerald-400 font-bold mt-1"><span className="text-zinc-400">Total Pipeline </span>: 142.0s</div>
         </div>
-      </div>
+      </section>
 
       {/* Navigation CTA */}
-      <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-6">
         <Link
           href="/journey"
-          className="inline-flex items-center gap-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition"
+          className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition"
         >
-          <span>Next: Read The Engineering Journey (V1 → V2)</span>
+          <span>Next: Engineering Journey (V1 → V2)</span>
           <span>→</span>
         </Link>
         <Link
           href="/technology"
           className="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition"
         >
-          View Technical Stack Table →
+          Technology Stack Table →
         </Link>
       </div>
     </div>

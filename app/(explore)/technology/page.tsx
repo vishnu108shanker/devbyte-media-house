@@ -83,30 +83,30 @@ export default function TechnologyPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
       {/* Header */}
       <div className="max-w-3xl">
-        <span className="font-mono text-xs uppercase tracking-wider text-emerald-400">
+        <span className="font-mono text-xs uppercase tracking-wider text-blue-400 font-semibold">
           Engineering Rationale
         </span>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-100">
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-100 font-mono">
           Technology Stack
         </h1>
-        <p className="mt-4 text-base sm:text-lg text-zinc-400 leading-relaxed">
-          Every layer in the DevByte architecture was selected with a specific engineering objective: deterministic reliability, maximum CPU saturation, zero cloud storage waste, and total decoupling.
+        <p className="mt-4 text-sm sm:text-base text-zinc-400 leading-relaxed">
+          Every layer in the DEVLAR / DevByte architecture was selected with a specific engineering objective: deterministic reliability, maximum CPU saturation, zero cloud storage waste, and total decoupling.
         </p>
       </div>
 
       {/* Stack Table */}
-      <div className="mt-12 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm">
+      <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
+          <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-950/80 text-xs font-mono uppercase tracking-wider text-zinc-400">
-                <th className="py-4 px-6 font-semibold">Architectural Layer</th>
-                <th className="py-4 px-6 font-semibold">Technology Choice</th>
-                <th className="py-4 px-6 font-semibold">Engineering &ldquo;Why&rdquo;</th>
-                <th className="py-4 px-6 font-semibold text-right">Role</th>
+              <tr className="border-b border-zinc-800 bg-zinc-950/80 text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                <th className="py-3.5 px-5 font-semibold">Architectural Layer</th>
+                <th className="py-3.5 px-5 font-semibold">Technology Choice</th>
+                <th className="py-3.5 px-5 font-semibold">Engineering &ldquo;Why&rdquo;</th>
+                <th className="py-3.5 px-5 font-semibold text-right">Role</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/60">
@@ -115,17 +115,17 @@ export default function TechnologyPage() {
                   key={row.technology}
                   className="transition hover:bg-zinc-800/30 group"
                 >
-                  <td className="py-4 px-6 font-medium text-zinc-300 whitespace-nowrap">
+                  <td className="py-3.5 px-5 font-medium text-zinc-300 whitespace-nowrap">
                     {row.layer}
                   </td>
-                  <td className="py-4 px-6 font-mono text-xs font-bold text-indigo-400 whitespace-nowrap">
+                  <td className="py-3.5 px-5 font-mono text-xs font-bold text-blue-400 whitespace-nowrap">
                     {row.technology}
                   </td>
-                  <td className="py-4 px-6 text-zinc-400 leading-relaxed max-w-xl">
+                  <td className="py-3.5 px-5 text-zinc-400 leading-relaxed max-w-xl">
                     {row.why}
                   </td>
-                  <td className="py-4 px-6 text-right whitespace-nowrap">
-                    <span className="inline-block rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1 font-mono text-[10px] text-zinc-400 group-hover:border-zinc-700">
+                  <td className="py-3.5 px-5 text-right whitespace-nowrap">
+                    <span className="inline-block rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-mono text-[10px] text-zinc-400 group-hover:border-zinc-700">
                       {row.badge}
                     </span>
                   </td>
@@ -136,32 +136,30 @@ export default function TechnologyPage() {
         </div>
       </div>
 
-      {/* Database Decoupling Callout */}
-      <div className="mt-12 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-6 sm:p-8">
+      {/* Dual Database Isolation Callout */}
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8">
         <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300">
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700 text-blue-400 font-mono text-sm font-bold">
+            DB
           </div>
           <div>
             <h3 className="text-base font-semibold text-zinc-100">
-              Strict Dual-Database Isolation Policy
+              Strict Dual-Database Isolation Architecture
             </h3>
             <p className="mt-1 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              PostgreSQL on EC2 serves as the production pipeline&apos;s immutable source of truth and is never queried by the web tier. MongoDB Atlas serves strictly as a presentation archive, receiving one publication document post-upload. The website remains 100% available even during EC2 maintenance or pipeline downtime.
+              PostgreSQL on EC2 serves as the production pipeline&apos;s immutable internal source of truth and is never queried by the web tier. MongoDB Atlas serves strictly as a presentation archive, receiving one publication document post-upload. The DEVLAR website remains 100% available even during EC2 maintenance or pipeline downtime.
             </p>
           </div>
         </div>
       </div>
 
       {/* Navigation CTA */}
-      <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-6">
         <Link
           href="/philosophy"
-          className="inline-flex items-center gap-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition"
+          className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition"
         >
-          <span>Next: Read the Core Philosophy &amp; Principles</span>
+          <span>Next: Core Engineering Philosophy</span>
           <span>→</span>
         </Link>
         <Link

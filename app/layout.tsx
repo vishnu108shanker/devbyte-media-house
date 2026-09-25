@@ -13,9 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DevByte Media House",
+  title: "DEVLAR — DevByte Media House",
   description:
-    "An autonomous pipeline that discovers dev news, scripts and renders short videos, and publishes to YouTube, Instagram, and Facebook.",
+    "An automated media system for discovering, understanding, generating and publishing technical content.",
+  icons: {
+    icon: "/devlar-icon.png",
+    apple: "/devlar-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,9 +30,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100 selection:bg-blue-500/20 selection:text-blue-200 font-sans">
+        {children}
+      </body>
     </html>
   );
 }
