@@ -2,6 +2,9 @@ import Link from "next/link";
 import { getOverviewStats, getPublications } from "@/lib/data";
 import VideoCard from "@/components/control/VideoCard";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ControlOverviewPage() {
   const stats = await getOverviewStats();
   const publications = await getPublications();

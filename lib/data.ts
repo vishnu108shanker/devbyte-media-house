@@ -1,4 +1,4 @@
-import clientPromise from "@/lib/mongodb";
+import { getMongoClient } from "@/lib/mongodb";
 import { Publication } from "@/lib/types";
 
 export const SAMPLE_PUBLICATIONS: Publication[] = [
@@ -115,22 +115,41 @@ export const SAMPLE_PUBLICATIONS: Publication[] = [
  */
 export async function getPublications(): Promise<Publication[]> {
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("devbyte");
     const docs = await db
-      .collection<Publication>("publications")
+      .collection("publications")
       .find({})
       .sort({ published_at: -1 })
       .toArray();
 
     if (docs && docs.length > 0) {
       return docs.map((doc) => ({
-        ...doc,
-        _id: doc._id.toString(),
-      }));
+        _id: doc._id ? doc._id.toString() : doc.video_id,
+        video_id: doc.video_id,
+        title: doc.title || "Untitled Publication",
+        published_at: doc.published_at || new Date().toISOString(),
+        platforms: {
+          youtube: doc.platforms?.youtube || { status: null, url: null },
+          instagram: doc.platforms?.instagram || { status: null, url: null },
+          facebook: doc.platforms?.facebook || { status: null, url: null },
+          devbyte_wiki: doc.platforms?.devbyte_wiki || { status: null, url: null },
+        },
+        performance: doc.performance || {
+          gemini_script_s: 0,
+          validator_s: 0,
+          tts_s: 0,
+          render_s: 0,
+          s3_upload_s: 0,
+          yt_upload_s: 0,
+          fb_upload_s: 0,
+          ig_upload_s: 0,
+          total_s: 0,
+        },
+      })) as Publication[];
     }
   } catch (err) {
-    console.warn("MongoDB fetch fallback to sample data:", (err as Error).message);
+    console.error("MongoDB fetch error, falling back to sample data:", (err as Error).message);
   }
 
   return SAMPLE_PUBLICATIONS;
