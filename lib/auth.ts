@@ -5,20 +5,28 @@ import { cookies } from "next/headers";
 export const SESSION_COOKIE_NAME = "devlar_session";
 const SESSION_DURATION = 60 * 60 * 24 * 7; // 7 days in seconds
 
-// Fallback hash for default password 'devbyte2026'
-const DEFAULT_HASH = "$2b$10$.nUo65MlhgL1zeSJOcvihOuYMnN9zYeLBrzLZHaVj8gQEC.8h..3C";
-const DEFAULT_SECRET = "da53341d81e6619a9fcd6a106608c4a340f1b31375eca73d1e1a45faafcbb3aa";
-
 export function getSecretKey(): Uint8Array {
-  const secret = process.env.SESSION_SECRET || DEFAULT_SECRET;
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error(
+      "[auth] SESSION_SECRET environment variable is not set. " +
+      "Set it in .env.local (dev) or Vercel Environment Variables (prod)."
+    );
+  }
   return new TextEncoder().encode(secret);
 }
 
 /**
- * Validates the admin plain-text password against ADMIN_PASSWORD_HASH or default hash.
+ * Validates the admin plain-text password against ADMIN_PASSWORD_HASH env var.
  */
 export async function verifyPassword(password: string): Promise<boolean> {
-  const hash = process.env.ADMIN_PASSWORD_HASH || DEFAULT_HASH;
+  const hash = process.env.ADMIN_PASSWORD_HASH;
+  if (!hash) {
+    throw new Error(
+      "[auth] ADMIN_PASSWORD_HASH environment variable is not set. " +
+      "Set it in .env.local (dev) or Vercel Environment Variables (prod)."
+    );
+  }
   return bcrypt.compare(password, hash);
 }
 

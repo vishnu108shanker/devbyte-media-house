@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const SESSION_COOKIE_NAME = "devlar_session";
-const DEFAULT_SECRET = "da53341d81e6619a9fcd6a106608c4a340f1b31375eca73d1e1a45faafcbb3aa";
 
-function getSecretKey(): Uint8Array {
-  const secret = process.env.SESSION_SECRET || DEFAULT_SECRET;
+function getSecretKey(): Uint8Array | null {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) return null; // fail-secure: no secret → treat as unauthenticated
   return new TextEncoder().encode(secret);
 }
 
@@ -20,9 +20,11 @@ export async function middleware(req: NextRequest) {
       if (token) {
         try {
           const secretKey = getSecretKey();
-          const { payload } = await jwtVerify(token, secretKey);
-          if (payload.role === "admin") {
-            return NextResponse.redirect(new URL("/control", req.url));
+          if (secretKey) {
+            const { payload } = await jwtVerify(token, secretKey);
+            if (payload.role === "admin") {
+              return NextResponse.redirect(new URL("/control", req.url));
+            }
           }
         } catch {
           // invalid token, let them access login
@@ -40,8 +42,13 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
+    const secretKey = getSecretKey();
+    if (!secretKey) {
+      // SESSION_SECRET not configured — block access entirely (fail-secure)
+      return NextResponse.redirect(new URL("/control/login", req.url));
+    }
+
     try {
-      const secretKey = getSecretKey();
       const { payload } = await jwtVerify(token, secretKey);
       if (payload.role !== "admin") {
         return NextResponse.redirect(new URL("/control/login", req.url));
