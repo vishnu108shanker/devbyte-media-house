@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,13 +12,63 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#09090b",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
-  title: "DEVLAR — DevByte Media House",
+  metadataBase: new URL("https://devbyte-media-house.vercel.app"),
+  title: {
+    default: "DEVLAR — DevByte Media House",
+    template: "%s | DEVLAR",
+  },
   description:
-    "An automated media system for discovering, understanding, generating and publishing technical content.",
+    "An autonomous media system for discovering, understanding, generating, and publishing technical developer content across YouTube, Instagram, and Facebook.",
+  keywords: [
+    "DEVLAR",
+    "DevByte",
+    "DevByte Media House",
+    "Autonomous Newsroom",
+    "Remotion",
+    "Gemini AI",
+    "Developer Automation",
+    "Video Engineering",
+  ],
+  authors: [{ name: "DevByte Team" }],
+  creator: "DevByte Media House",
   icons: {
     icon: "/devlar-icon.png",
     apple: "/devlar-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://devbyte-media-house.vercel.app",
+    title: "DEVLAR — DevByte Media House",
+    description:
+      "An autonomous media system for discovering, understanding, generating, and publishing technical content on autopilot.",
+    siteName: "DEVLAR",
+    images: [
+      {
+        url: "/devlar-icon.png",
+        width: 1024,
+        height: 1024,
+        alt: "DEVLAR — DevByte Media House Icon",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DEVLAR — DevByte Media House",
+    description:
+      "An autonomous media system for discovering, understanding, generating, and publishing technical content.",
+    images: ["/devlar-icon.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
