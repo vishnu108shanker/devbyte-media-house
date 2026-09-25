@@ -1,14 +1,25 @@
-// Control Center layout — Phase 2 will add the auth guard here.
-// For Phase 0 this is a passthrough; the middleware/cookie check is wired in Phase 2.
-export default function ControlLayout({
+import { getSession } from "@/lib/auth";
+import ControlHeader from "@/components/control/ControlHeader";
+
+export default async function ControlLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSession();
+
+  // If unauthenticated (e.g. rendering login page), render children directly
+  if (!session) {
+    return <>{children}</>;
+  }
+
+  // Authenticated Control Center Shell
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
-      {/* Control Center shell — nav + auth guard added in Phase 2 */}
-      {children}
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans">
+      <ControlHeader />
+      <div className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {children}
+      </div>
     </div>
   );
 }
