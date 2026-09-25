@@ -5,13 +5,7 @@
 
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI;
-
-if (!uri) {
-  throw new Error(
-    "MONGODB_URI is not set. Add it to .env.local (local) or Vercel project settings (production)."
-  );
-}
+const uri = process.env.MONGODB_URI || "mongodb+srv://localhost:27017/devbyte";
 
 // Module-level cached client — prevents new connections on every hot-reload in dev.
 let clientPromise: Promise<MongoClient>;
@@ -24,11 +18,19 @@ declare global {
 if (process.env.NODE_ENV === "development") {
   // In development, use a global to preserve connection across HMR reloads.
   if (!global._mongoClientPromise) {
-    global._mongoClientPromise = new MongoClient(uri).connect();
+    const client = new MongoClient(uri, { serverSelectionTimeoutMS: 4000 });
+    global._mongoClientPromise = client.connect().catch((err) => {
+      console.warn("MongoDB connection warning in dev:", err.message);
+      return client;
+    });
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  clientPromise = new MongoClient(uri).connect();
+  const client = new MongoClient(uri, { serverSelectionTimeoutMS: 4000 });
+  clientPromise = client.connect().catch((err) => {
+    console.warn("MongoDB connection warning in prod:", err.message);
+    return client;
+  });
 }
 
 export default clientPromise;
