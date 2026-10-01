@@ -1,146 +1,119 @@
-import Link from "next/link";
-import JourneyMilestoneCard, { Milestone } from "@/components/explore/JourneyMilestoneCard";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import PagePager from "@/components/ui/PagePager";
+
+const MILESTONES = [
+  {
+    version: "v1.0",
+    date: "Jun 2026",
+    title: "The First Pipeline",
+    desc: "Initial proof of concept: GitHub Trending → Gemini → Edge TTS → Remotion. A single Python script fetched the top trending repo, summarized it, generated audio, and rendered a video. Uploaded manually.",
+    bottleneck: "No filtering, no editorial judgment. The system would happily publish a JavaScript tutorial or a 'how to use Tailwind' guide as breaking developer news.",
+  },
+  {
+    version: "v2.0",
+    date: "Jun 23, 2026",
+    title: "Full Architectural Rewrite",
+    desc: "Complete rewrite introducing the editorial engine, parallel batch processing, and automated YouTube uploads via OAuth 2.0. The pipeline became a state machine rather than a script.",
+    bottleneck: "Selection was still based on an arbitrary 4-factor arithmetic score (freshness + popularity + trust + quality). Gemini would hallucinate context when source URLs returned 404s.",
+  },
+  {
+    version: "v2.1 – v2.2",
+    date: "Jul 4, 2026",
+    title: "Newsroom Overhaul — 4 Sources",
+    desc: "Expanded from GitHub Trending only to 4 independent sources: Hacker News API, Official Blog RSS feeds, GitHub Releases API, and Product Hunt RSS. Added the Signal Filter and a batch Gemini scoring system. Introduced source diversity cap (max 2 per source).",
+    bottleneck: "Deduplicator was URL-only — the same story could appear with different titles from different sources and pass through. Hype bonus made borderline meme content score too high.",
+  },
+  {
+    version: "v2.3",
+    date: "Sep 7, 2026",
+    title: "Evidence-Driven Editorial Engine",
+    desc: "Scrapped the 4-factor arithmetic score entirely. Replaced with an Evidence Builder (compiling objective facts: recency, engagement, source authority, cross-source coverage) and a two-pass Gemini evaluation system (Mission Check → Relative Ranking). Added 30-hour evaluation cache with viral re-scoring. Company diversity cap introduced.",
+    bottleneck: "Single-threaded evaluation took too long for large candidate batches (50+ items). The render + upload sequence was completely sequential with no parallelism.",
+  },
+  {
+    version: "v2.4",
+    date: "Sep 8, 2026",
+    title: "Parallel Evaluation + Resumable Uploads",
+    desc: "Pass 1 evaluation now runs in parallel via ThreadPoolExecutor (up to 5 concurrent Gemini chunks). YouTube upload switched to resumable 2 MB chunks with progress logging. Per-video timing reports introduced with proportional ASCII bar charts.",
+    bottleneck: "Still no Instagram or Facebook publishing. Rendered videos were only going to YouTube. No cloud storage bridge existed.",
+  },
+  {
+    version: "v2.4",
+    date: "Sep 18, 2026",
+    title: "Migration from history.json to PostgreSQL + MongoDB Atlas",
+    desc: "The pipeline's internal state (candidates, evaluation results, and run history) was migrated from a local JSON file to PostgreSQL. The presentation layer (published video records) was migrated to MongoDB Atlas. This decoupling allows the website to read published records even when the EC2 pipeline is offline.",
+    bottleneck: "Still no Instagram or Facebook publishing. Rendered videos were only going to YouTube. No cloud storage bridge existed.",
+  },
+  {
+    version: "v2.5",
+    date: "Sep 22, 2026",
+    title: "Triple Broadcast + AWS S3 Bridge",
+    desc: "Multi-platform publishing engine complete. AWS S3 temporary asset bridge: upload once, generate a 2-hour presigned URL, broadcast concurrently to Instagram Reels (Meta Graph API) and Facebook Pages (Meta Graph API), auto-delete. Concurrent pre-production (script + TTS in parallel across all batch candidates). 100% CPU core saturation via os.cpus().length Remotion concurrency.",
+    bottleneck: null,
+  },
+];
 
 export default function JourneyPage() {
-  const milestones: Milestone[] = [
-    {
-      version: "v1.0.0",
-      date: "June 2026",
-      title: "The Single-Source Prototype",
-      problem:
-        "Validating whether programmatic video generation with Remotion and LLMs could produce coherent short-form developer videos without human editing.",
-      decision:
-        "Built a simple sequential script scraping GitHub Trending, prompting Gemini with a basic template, generating Edge TTS audio, and rendering locally.",
-      result:
-        "Confirmed Remotion + LLM viability, but suffered from narrow GitHub-only topics, single-threaded slow rendering, and manual video upload friction.",
-      tech: ["GitHub Scraper", "Gemini 1.5 Flash", "Edge TTS", "Remotion 4.x", "Single-threaded"],
-      deepDive:
-        "The v1 prototype proved that dynamic React layouts could synchronize with TTS sentence durations, but manual execution tethered output to developer availability.",
-    },
-    {
-      version: "v2.0.0",
-      date: "June 2026",
-      title: "Architectural Rewrite & Automated Uploads",
-      problem:
-        "Manual uploads were the primary operational bottleneck, limiting throughput to 1 video per manual run with frequent human error.",
-      decision:
-        "Architected an automated Node.js batch orchestrator with isolated worker directories and integrated direct OAuth 2.0 YouTube Shorts upload with 2 MB chunking.",
-      result:
-        "Achieved the first fully autonomous end-to-end publish cycle to YouTube with zero human intervention.",
-      tech: ["Node.js Orchestrator", "YouTube Data API v3", "OAuth 2.0 Resumable", "Worker Directory Isolation"],
-      deepDive:
-        "Isolated worker directories (worker_0 to worker_4) prevented file write collisions during concurrent pre-production and sequential video rendering.",
-    },
-    {
-      version: "v2.2.0",
-      date: "July 2026",
-      title: "The 4-Source Newsroom Overhaul",
-      problem:
-        "GitHub Trending alone created content fatigue and missed critical breaking news in AI models, developer infrastructure, and official framework releases.",
-      decision:
-        "Added 3 new ingestion streams (Hacker News JSON API, official engineering RSS feeds, Product Hunt) with deterministic signal whitelists and noise blacklists.",
-      result:
-        "Broadened editorial coverage to the entire tech ecosystem while filtering out 90%+ of generic tutorials, opinion pieces, and spam before scoring.",
-      tech: ["HN JSON API", "RSS/Atom Parser", "Keyword Whitelist", "Story-Level Deduplicator"],
-      deepDive:
-        "The story-level deduplicator uses canonical URL normalization and fuzzy title matching to prevent duplicate videos when multiple sources cover the same event.",
-    },
-    {
-      version: "v2.3.0",
-      date: "September 2026",
-      title: "Evidence-Driven Scoring Engine",
-      problem:
-        "Legacy 4-factor arithmetic point scoring (freshness + stars + upvotes = score) created false precision and allowed low-quality tutorials to slip through.",
-      decision:
-        "Scrapped point formulas entirely. Implemented deterministic hard gates followed by factual evidence compilation and two-pass LLM editorial ranking.",
-      result:
-        "Established the core principle: Code determines what is allowed; Gemini determines what is worth publishing. Reduced false-positive publishes by 95%.",
-      tech: ["Two-Pass Gemini Evaluation", "Evidence Builder", "Tournament Ranking", "30-Hour Semantic Cache"],
-      deepDive:
-        "Pass 1 evaluates candidates in parallel chunks of 10 for mission alignment; Pass 2 ranks publishable items from 1..N using tournament comparison for large sets.",
-    },
-    {
-      version: "v2.4.0",
-      date: "September 2026",
-      title: "Parallel Pre-Production & Telemetry",
-      problem:
-        "Sequential script generation and audio synthesis added unnecessary latency before rendering could begin; lack of phase-level telemetry made profiling difficult.",
-      decision:
-        "Engineered concurrent pre-production with ThreadPoolExecutor (scripts + TTS synthesized in parallel) and added millisecond-level phase instrumentation.",
-      result:
-        "Cut pre-production latency from 60+ seconds to ~12 seconds for an entire 5-video batch and emitted visual ASCII performance reports.",
-      tech: ["ThreadPoolExecutor", "Concurrent Pre-Production", "Millisecond Phase Timers", "ASCII Terminal Reports"],
-      deepDive:
-        "All scripts and audio files are ready before worker 0 begins rendering, allowing the CPU to stay 100% saturated with zero idle pipeline pauses.",
-    },
-    {
-      version: "v2.5.0",
-      date: "September 2026",
-      title: "Multi-Platform Relay & S3 Ephemeral Bridge",
-      problem:
-        "Publishing only to YouTube limited audience reach, while uploading multi-gigabyte video files to cloud storage created ongoing storage costs.",
-      decision:
-        "Integrated Meta Graph API (Instagram Reels & Facebook Pages) and built an AWS S3 temporary bridge with automated lifecycle deletion post-broadcast.",
-      result:
-        "Simultaneous triple-platform distribution with zero persistent cloud asset storage and 100% CPU multi-core Remotion saturation.",
-      tech: ["Meta Graph API v19.0", "AWS S3 boto3 Presigned URLs", "100% Host CPU Saturation", "Buffered Zero-Clutter Logging"],
-      deepDive:
-        "The S3 bridge generates a 2-hour presigned URL for Meta ingestion and immediately triggers bucket cleanup once Instagram and Facebook verify upload completion.",
-    },
-    {
-      version: "Cloud / Infra",
-      date: "Present",
-      title: "Dockerization, EC2 Deployment & Postgres Truth",
-      problem:
-        "Executing on local hardware created dependency on personal machine uptime and prevented reliable scheduled automation.",
-      decision:
-        "Containerized the pipeline with Docker, deployed onto AWS EC2 with PostgreSQL as the immutable system of record, and decoupled DEVLAR on Vercel.",
-      result:
-        "Total operational decoupling: the pipeline runs autonomously on cloud compute, while DEVLAR presents live verified results with 100% uptime.",
-      tech: ["Docker & Docker Compose", "AWS EC2", "PostgreSQL", "Decoupled MongoDB Atlas Archive"],
-      deepDive:
-        "PostgreSQL on EC2 holds internal run state and candidates; MongoDB Atlas receives one document per publication read-only by this website.",
-    },
-  ];
-
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
-      {/* Header */}
-      <div className="max-w-3xl">
-        <span className="font-mono text-xs uppercase tracking-wider text-blue-400 font-semibold">
-          Evolutionary Chronicle
-        </span>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-100 font-mono">
-          The Engineering Journey
-        </h1>
-        <p className="mt-4 text-sm sm:text-base text-zinc-400 leading-relaxed">
-          How a weekend prototype scraping GitHub Trending evolved across 7 major milestones into an industrial-grade, multi-platform autonomous media system.
-        </p>
-      </div>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-12">
+      <Breadcrumbs />
 
-      {/* Narrative Timeline */}
-      <div className="relative border-l border-zinc-800 ml-4 sm:ml-8 pl-6 sm:pl-10 space-y-14">
-        {milestones.map((m) => (
-          <JourneyMilestoneCard key={m.version} milestone={m} />
+      <header className="mb-16 text-center">
+        <div className="pill pill-accent mb-4 mx-auto w-fit">Evolution</div>
+        <h1 className="heading-xl text-[var(--tx-1)]">Engineering Journey</h1>
+        <p className="mt-4 text-lg text-[var(--tx-2)] leading-relaxed mx-auto max-w-2xl">
+          From a single weekend bash script to an industrial-grade cloud-native media system. Each version was driven by a real problem — not a feature checklist.
+        </p>
+      </header>
+
+      <div className="timeline mt-6 space-y-10">
+        {MILESTONES.map((m) => (
+          <div key={m.version} className="relative">
+            {/* Timeline dot */}
+            <div className="absolute -left-[calc(2.25rem-0.6875rem)] top-5 h-3 w-3 rounded-full bg-[var(--accent)] shadow-[0_0_12px_rgba(99,157,255,.6)] border-2 border-[var(--bg)] z-10" />
+
+            <div className="card p-6 sm:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <h3 className="heading-lg text-[var(--tx-1)]">{m.title}</h3>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="mono text-[10px] text-[var(--tx-3)]">{m.date}</span>
+                  <span className="mono px-2 py-1 rounded bg-[var(--accent-dim)] border border-[var(--border-active)] text-[var(--accent)] text-xs font-bold">{m.version}</span>
+                </div>
+              </div>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-5">{m.desc}</p>
+
+              {m.bottleneck ? (
+                <div className="rounded-xl border border-[rgba(243,94,122,.3)] bg-[rgba(243,94,122,.05)] p-4">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--rose)] shrink-0" />
+                    <span className="mono text-[10px] font-bold tracking-widest text-[var(--rose)] uppercase">The Bottleneck That Drove the Next Version</span>
+                  </div>
+                  <p className="text-sm text-[var(--tx-1)] leading-relaxed">{m.bottleneck}</p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-[rgba(62,207,142,.3)] bg-[rgba(62,207,142,.05)] p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--green)] shrink-0" />
+                    <span className="mono text-[10px] font-bold tracking-widest text-[var(--green)] uppercase">Current stable version — no known architectural bottlenecks</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Navigation CTA */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-6">
-        <Link
-          href="/technology"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition"
-        >
-          <span>Next: Technology Stack Table</span>
-          <span>→</span>
-        </Link>
-        <Link
-          href="/philosophy"
-          className="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition"
-        >
-          Core Engineering Philosophy →
-        </Link>
+      <div className="mt-16 card p-8 text-center">
+        <h3 className="heading-md text-[var(--tx-1)] mb-3">What's next?</h3>
+        <p className="text-sm text-[var(--tx-2)] leading-relaxed max-w-xl mx-auto">
+          The v3 roadmap includes containerization with Docker Compose (see DOCKER_NOTES.md), PostgreSQL → MongoDB Atlas migration for unified data access, and the DevByte Wiki — a long-form article companion to the short-form video channel.
+        </p>
       </div>
+
+      <PagePager
+        prev={{ href: "/how-it-works", label: "How It Works" }}
+        next={{ href: "/technology", label: "Technology Stack" }}
+      />
     </div>
   );
 }

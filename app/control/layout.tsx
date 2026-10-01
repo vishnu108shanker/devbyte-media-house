@@ -1,19 +1,14 @@
 import { getSession } from "@/lib/auth";
 import ControlHeader from "@/components/control/ControlHeader";
 
-export default async function ControlLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function ControlLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
 
-  // If unauthenticated (e.g. rendering login page), render children directly
+  // Unauthenticated — render login page without shell
   if (!session) {
     return <>{children}</>;
   }
 
-  // Authenticated Control Center Shell
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans">
       <ControlHeader />

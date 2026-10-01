@@ -1,260 +1,232 @@
-import Link from "next/link";
-import ArchitectureExplorer, { StageDetail } from "@/components/explore/ArchitectureExplorer";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import TableOfContents from "@/components/ui/TableOfContents";
+import PagePager from "@/components/ui/PagePager";
+
+const TOC = [
+  { id: "overview",    title: "Overview" },
+  { id: "discovery",   title: "Stage 1 — Discovery" },
+  { id: "ingestion",   title: "Stage 2 — Ingestion" },
+  { id: "editorial",   title: "Stage 3 — AI Newsroom" },
+  { id: "production",  title: "Stage 4 — Production" },
+  { id: "broadcast",   title: "Stage 5 — Broadcast" },
+];
 
 export default function HowItWorksPage() {
-  const stages: StageDetail[] = [
-    {
-      id: "discovery",
-      num: "01",
-      name: "Content Discovery",
-      tagline: "4 Independent Ingestion Streams",
-      description:
-        "Continuously collects raw developer activity, releases, and infrastructure announcements across disparate protocols and formats.",
-      components: [
-        {
-          name: "Hacker News API",
-          type: "JSON REST",
-          role: "Polls top stories and comments with score and discussion velocity tracking.",
-        },
-        {
-          name: "Engineering Blogs",
-          type: "RSS / Atom Feeds",
-          role: "Direct newsrooms from OpenAI, Anthropic, Google DeepMind, Meta, and AWS.",
-        },
-        {
-          name: "GitHub Releases",
-          type: "GitHub REST API",
-          role: "Major version releases and changelogs from tracked developer infrastructure repos.",
-        },
-        {
-          name: "Product Hunt",
-          type: "RSS Feed",
-          role: "Curated developer tools, productivity software, and AI infrastructure launches.",
-        },
-      ],
-      hardInvariants: [
-        "All collectors run independently; failure of one collector does not abort the batch.",
-        "Payloads are stored with original source timestamps and source URI for provenance.",
-      ],
-    },
-    {
-      id: "filtering",
-      num: "02",
-      name: "Ingestion & Filter Cascade",
-      tagline: "Deterministic Hard Gates",
-      description:
-        "Before any LLM token is consumed, candidates pass through five strict rule-based filters that strip tutorials, opinion pieces, stale items, and duplicates.",
-      components: [
-        {
-          name: "Normalizer",
-          type: "Schema Uniformity",
-          role: "Maps distinct source payloads into a single standardized candidate contract.",
-        },
-        {
-          name: "Signal Filter",
-          type: "Keyword Gate",
-          role: "Enforces technical whitelists while blacklisting tutorials, beginner guides, roundups, and essays.",
-        },
-        {
-          name: "Quality Filter",
-          type: "Structural Gate",
-          role: "Drops malformed URLs, empty descriptions, or payloads missing essential context.",
-        },
-        {
-          name: "Deduplicator",
-          type: "Fuzzy & Canonical Matching",
-          role: "Eliminates duplicate coverage of the same event across multiple sources.",
-        },
-        {
-          name: "Staleness Gate",
-          type: "14-Day Cutoff",
-          role: "Discards any announcement older than 14 days to guarantee news freshness.",
-        },
-      ],
-      hardInvariants: [
-        "Deterministic filters reject noise with 0 LLM token cost.",
-        "Historical deduplicator checks previous publications to prevent duplicate video generation.",
-      ],
-    },
-    {
-      id: "intelligence",
-      num: "03",
-      name: "AI Newsroom & Editorial Engine",
-      tagline: "Two-Pass Gemini Judgment",
-      description:
-        "Replaces arbitrary arithmetic scoring formulas with factual evidence compilation, two-pass LLM judgment, and structural validation.",
-      components: [
-        {
-          name: "Evidence Builder",
-          type: "Facts Over Points",
-          role: "Compiles recency (days_ago), engagement (stars, upvotes), authority (official blog vs forum), and cross-source corroboration.",
-        },
-        {
-          name: "Pass 1: Mission Check",
-          type: "Chunked Classification",
-          role: "Processes items in batches of 10 concurrently via ThreadPoolExecutor. Gemini assigns publish or reject with concrete factual reasons.",
-        },
-        {
-          name: "Pass 2: Relative Ranking",
-          type: "Global Order (1..N)",
-          role: "Publishes a strictly ranked leaderboard using segmented tournament comparison for large candidate sets.",
-        },
-        {
-          name: "Editorial Rotation",
-          type: "Diversity Engine",
-          role: "Enforces category rotation across 8 content types, max 2 stories per company, and max 3 per source.",
-        },
-        {
-          name: "30-Hour Semantic Cache",
-          type: "Cache & Re-Score",
-          role: "Caches evaluations; triggers instant re-evaluation if an item's points surge by >50%.",
-        },
-      ],
-      hardInvariants: [
-        "LLM temperature set to 0.0 for stability heuristic; structured JSON schema enforced.",
-        "Automated self-healing retries with model fallbacks (gemini-2.5-flash, gemini-3.5-flash).",
-      ],
-    },
-    {
-      id: "production",
-      num: "04",
-      name: "Concurrent Video Production",
-      tagline: "100% Host CPU Saturation",
-      description:
-        "High-throughput vertical video generation combining neural speech synthesis, spring physics, and hardware-accelerated Remotion rendering.",
-      components: [
-        {
-          name: "Concurrent Pre-Production",
-          type: "Gemini + Edge TTS",
-          role: "Scripts, validates, and synthesizes neural audio for all batch candidates concurrently in ~10–15s total.",
-        },
-        {
-          name: "Hardware Saturation",
-          type: "Remotion Multi-Core",
-          role: "Dynamically pins 100% of host CPU cores on EC2 (concurrency = os.cpus().length) for maximum render speed.",
-        },
-        {
-          name: "Dynamic Sentence Timing",
-          type: "Acoustic Alignment",
-          role: "Calculates scene boundaries and bullet entrances directly from TTS audio duration metadata.",
-        },
-        {
-          name: "Vector Bullet Badges",
-          type: "Deterministic SVG",
-          role: "Rotating tech themes (zap, neural core, rocket, sparkle) with active narration glow effects.",
-        },
-      ],
-      hardInvariants: [
-        "Scene boundaries are contiguous with zero audio-visual drift.",
-        "Isolated worker directories prevent race conditions during concurrent batch runs.",
-      ],
-    },
-    {
-      id: "publishing",
-      num: "05",
-      name: "Multi-Platform Publishing Engine",
-      tagline: "Ephemeral S3 Bridge & Triple Broadcast",
-      description:
-        "Simultaneously broadcasts finished video assets to major video platforms without retaining unnecessary cloud storage.",
-      components: [
-        {
-          name: "YouTube Shorts",
-          type: "Resumable Upload",
-          role: "Direct OAuth 2.0 streaming in 2 MB resumable chunks with metadata injection and private staging.",
-        },
-        {
-          name: "AWS S3 Temporary Bridge",
-          type: "Presigned Relay",
-          role: "Uploads video once to an Amazon S3 temporary bucket, generates 2-hour presigned URL for Meta ingestion.",
-        },
-        {
-          name: "Instagram Reels",
-          type: "Meta Graph API",
-          role: "Initiates REELS container, polls processing lifecycle, and triggers instant publication.",
-        },
-        {
-          name: "Facebook Pages",
-          type: "Meta Graph API",
-          role: "Transfers via Page Video endpoint with asynchronous status polling.",
-        },
-        {
-          name: "Automated S3 Cleanup",
-          type: "Zero Cloud Waste",
-          role: "Deletes the temporary S3 asset immediately after Instagram and Facebook acknowledge completion.",
-        },
-      ],
-      hardInvariants: [
-        "Zero permanent cloud video storage: S3 assets deleted automatically after Meta ingestion.",
-        "Append-only publication record written to PostgreSQL (EC2) and MongoDB Atlas archive.",
-      ],
-    },
-  ];
-
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
-      {/* Header */}
-      <div className="max-w-3xl">
-        <span className="font-mono text-xs uppercase tracking-wider text-blue-400 font-semibold">
-          System Architecture
-        </span>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-100 font-mono">
-          How DevByte Works
-        </h1>
-        <p className="mt-4 text-sm sm:text-base text-zinc-400 leading-relaxed">
-          DevByte Engine transforms raw developer activity into high-fidelity short-form videos through an autonomous 5-stage pipeline designed for deterministic reliability, hardware saturation, and zero cloud waste.
-        </p>
-      </div>
+    /*
+      Layout: left content column + right sticky TOC sidebar.
+      The TOC is ONLY rendered once — as the right sidebar on ≥lg,
+      and as a mobile accordion (inside TableOfContents) on <lg.
+      Never render TableOfContents inside the content column or it overlaps.
+    */
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
+      <div className="lg:grid lg:grid-cols-[1fr_256px] lg:gap-16 items-start">
 
-      {/* Interactive Architecture Explorer */}
-      <ArchitectureExplorer stages={stages} />
+        {/* ── Content column ───────────────────────────────── */}
+        <article className="min-w-0">
+          <Breadcrumbs />
 
-      {/* Telemetry & Performance Instrumentation */}
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-sm">
-        <div className="max-w-2xl">
-          <span className="font-mono text-xs uppercase tracking-wider text-amber-400 font-semibold">
-            Telemetry &amp; Instrumentation
-          </span>
-          <h2 className="mt-1 text-2xl font-bold text-zinc-100">
-            Real-Time Pipeline Performance
-          </h2>
-          <p className="mt-2 text-xs sm:text-sm text-zinc-400">
-            The orchestrator measures every micro-phase in milliseconds, emitting visual ASCII timing reports for terminal operators and pushing metrics to the presentation archive.
-          </p>
-        </div>
-
-        <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-5 font-mono text-xs text-zinc-300 overflow-x-auto">
-          <div className="text-amber-400 font-bold mb-2">
-            ⏱️ PERFORMANCE REPORT: &quot;NVIDIA to Acquire Hugging Face&quot;
+          {/* Mobile TOC — accordion, only on <lg. Hidden on lg+ */}
+          <div className="lg:hidden mb-10">
+            <TableOfContents items={TOC} />
           </div>
-          <div className="text-zinc-700">────────────────────────────────────────────────────────────</div>
-          <div className="py-0.5"><span className="text-zinc-500">Gemini Script  </span>:  6.2s  <span className="text-blue-400">█</span></div>
-          <div className="py-0.5"><span className="text-zinc-500">Validator      </span>:  0.2s</div>
-          <div className="py-0.5"><span className="text-zinc-500">TTS Voice      </span>:  4.1s  <span className="text-blue-400">█</span></div>
-          <div className="py-0.5"><span className="text-zinc-500">Remotion Render</span>: 58.4s  <span className="text-blue-400">████████████████████</span> (100% CPU)</div>
-          <div className="py-0.5"><span className="text-zinc-500">YT Upload      </span>: 18.2s  <span className="text-blue-400">██████</span></div>
-          <div className="py-0.5"><span className="text-zinc-500">S3 Temp Upload </span>:  4.3s  <span className="text-blue-400">█</span></div>
-          <div className="py-0.5"><span className="text-zinc-500">IG Upload      </span>: 26.5s  <span className="text-blue-400">█████████</span></div>
-          <div className="py-0.5"><span className="text-zinc-500">FB Upload      </span>: 24.1s  <span className="text-blue-400">████████</span></div>
-          <div className="text-zinc-700">────────────────────────────────────────────────────────────</div>
-          <div className="text-emerald-400 font-bold mt-1"><span className="text-zinc-400">Total Pipeline </span>: 142.0s</div>
-        </div>
-      </section>
 
-      {/* Navigation CTA */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-6">
-        <Link
-          href="/journey"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition"
-        >
-          <span>Next: Engineering Journey (V1 → V2)</span>
-          <span>→</span>
-        </Link>
-        <Link
-          href="/technology"
-          className="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition"
-        >
-          Technology Stack Table →
-        </Link>
+          {/* Page header */}
+          <header className="mb-14">
+            <div className="pill pill-accent mb-4">Architecture</div>
+            <h1 className="heading-xl text-[var(--tx-1)]">How It Works</h1>
+            <p className="mt-4 text-lg text-[var(--tx-2)] leading-relaxed max-w-2xl">
+              The DEVLAR pipeline is a deterministic, five-stage state machine. It runs periodically via cron on an AWS EC2 instance, traversing from internet discovery to multi-platform broadcast entirely without human oversight.
+            </p>
+          </header>
+
+          <div className="space-y-20">
+
+            {/* ── Overview ─────────────────────────────────── */}
+            <section id="overview" className="scroll-mt-24">
+              <h2 className="heading-lg mb-4 pb-3 border-b border-[var(--border)]">Overview</h2>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-6">
+                Unlike typical AI wrappers that fetch one URL and paraphrase it, DEVLAR is modelled as a digital newsroom. Every stage has a single, well-defined responsibility, and failure in one stage never cascades — each gate protects the next. The pipeline starts with four independent discovery streams and fans in, running through deterministic hard-gates before a single LLM token is spent.
+              </p>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-6">
+                The editorial mission is strict: <em>"DevByte covers products, releases, tools, developer infrastructure, AI breakthroughs, and major engineering announcements — not essays, tutorials, opinion pieces, or long-form discussions."</em>
+              </p>
+
+              <div className="card p-6 border-l-4 border-l-[var(--accent)] bg-[var(--accent-dim)] not-prose">
+                <h4 className="font-semibold text-[var(--tx-1)] mb-2 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[var(--accent)] shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  Zero Permanent Storage
+                </h4>
+                <p className="text-sm text-[var(--tx-2)] leading-relaxed">
+                  The engine runs on ephemeral EC2 compute. No video files are stored permanently. Every rendered MP4 is relayed via a 2-hour presigned S3 URL, broadcast to all platforms concurrently, and then automatically deleted — storage costs remain absolutely flat at any scale.
+                </p>
+              </div>
+            </section>
+
+            {/* ── Stage 1: Discovery ───────────────────────── */}
+            <section id="discovery" className="scroll-mt-24">
+              <h2 className="heading-lg mb-4 pb-3 border-b border-[var(--border)] flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border)] mono text-sm font-bold text-[var(--accent)]">01</span>
+                Content Discovery
+              </h2>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-6">
+                The pipeline fans out to four independent collectors running concurrently. A failure in one source never blocks the batch — each collector is isolated and writes to its own output before they are merged downstream.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { name:"Hacker News API",    type:"JSON REST",   desc:"Polls top 50 stories. Items are scored for engagement velocity and tech-topic relevance before passing the signal filter." },
+                  { name:"Official Blogs",     type:"RSS / Atom",  desc:"Direct feeds from OpenAI, Google DeepMind, Anthropic, Meta, and AWS. No crawling needed — these are curated high-trust sources." },
+                  { name:"GitHub Releases",    type:"REST API",    desc:"Watches /releases/latest on a curated list of tracked infrastructure repositories. Picks up major version bumps." },
+                  { name:"Product Hunt",       type:"RSS Feed",    desc:"Developer tools, AI infrastructure, and productivity launches. Score- and recency-filtered before normalization." },
+                ].map(item => (
+                  <div key={item.name} className="card p-5">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <strong className="text-sm font-semibold text-[var(--tx-1)]">{item.name}</strong>
+                      <span className="mono text-[9px] border border-[var(--border)] rounded px-1.5 py-0.5 text-[var(--tx-3)] shrink-0">{item.type}</span>
+                    </div>
+                    <p className="text-xs text-[var(--tx-2)] leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── Stage 2: Ingestion / Filtering ──────────── */}
+            <section id="ingestion" className="scroll-mt-24">
+              <h2 className="heading-lg mb-4 pb-3 border-b border-[var(--border)] flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border)] mono text-sm font-bold text-[var(--accent)]">02</span>
+                Ingestion Pipeline (Zero-Token Gates)
+              </h2>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-6">
+                Before a single Gemini API call is made, every candidate must pass five deterministic hard-gates in sequence. These are rule-based — fast, cheap, and predictable. They exist so the expensive AI editorial layer only sees structurally sound, non-duplicate, technically relevant content.
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  { color:"var(--accent)",  label:"Normalizer",       desc:"Maps all four sources into a single unified candidate schema. Field names, date formats, and URL structures are standardized here." },
+                  { color:"var(--amber)",   label:"Signal Filter",    desc:"Keyword whitelist + noise blacklist. Whitelists technical topics; blacklists tutorial, guide, opinion, essay, roundup, vercel, cloudflare." },
+                  { color:"var(--amber)",   label:"Quality Filter",   desc:"Enforces schema presence. Drops items with missing titles, empty descriptions, or malformed URLs." },
+                  { color:"var(--green)",   label:"Deduplicator",     desc:"Story-level identity check across sources using canonical URL normalization and fuzzy title similarity. Prevents the same story appearing twice." },
+                  { color:"var(--rose)",    label:"Staleness Gate",   desc:"Hard 14-day recency cutoff. Any item older than 14 days is dropped without consulting the LLM." },
+                ].map(({ color, label, desc }) => (
+                  <div key={label} className="flex gap-4 items-start">
+                    <div className="mt-1.5 w-0.5 h-10 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                    <div className="flex-1">
+                      <strong className="block text-sm font-semibold text-[var(--tx-1)] mb-0.5">{label}</strong>
+                      <p className="text-sm text-[var(--tx-2)] leading-relaxed">{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── Stage 3: AI Newsroom ─────────────────────── */}
+            <section id="editorial" className="scroll-mt-24">
+              <h2 className="heading-lg mb-4 pb-3 border-b border-[var(--border)] flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border)] mono text-sm font-bold text-[var(--accent)]">03</span>
+                AI Newsroom — Two-Pass Gemini Editorial
+              </h2>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-6">
+                Survivors from the ingestion pipeline enter the AI editorial layer. Instead of arbitrary composite scores, DEVLAR uses an evidence-driven approach: an Evidence Builder compiles objective facts, then Gemini Flash evaluates each item twice. Temperature is fixed at 0.0 and all responses are validated against a strict JSON schema.
+              </p>
+
+              <blockquote className="border-l-4 border-[var(--accent)] pl-5 my-6 text-[var(--tx-2)] italic text-sm leading-relaxed">
+                "Code determines what is allowed. Gemini determines what is worth publishing."
+              </blockquote>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                <div className="card p-6 border-t-2 border-t-[var(--accent)]">
+                  <h3 className="font-bold text-[var(--tx-1)] mb-2">Pass 1 — Mission Check</h3>
+                  <p className="text-sm text-[var(--tx-2)] leading-relaxed">Items are batched in chunks of 10. Up to 5 chunks are sent concurrently via <code className="mono text-[var(--accent)] text-xs">ThreadPoolExecutor</code>. Gemini classifies each item as <code className="mono text-xs text-[var(--green)]">publish</code> or <code className="mono text-xs text-[var(--rose)]">reject</code> with a concrete 1–2 sentence editorial reason grounded in factual evidence, not a numeric score.</p>
+                </div>
+                <div className="card p-6 border-t-2 border-t-[var(--accent-bright)]">
+                  <h3 className="font-bold text-[var(--tx-1)] mb-2">Pass 2 — Relative Ranking</h3>
+                  <p className="text-sm text-[var(--tx-2)] leading-relaxed">All approved items are ranked 1..N in strict order by newsworthiness. Large batches (50+ items) use segmented tournament ranking. Company diversity (max 2 per company) and source diversity (max 3 per source) constraints are enforced. The top 5 items form the production queue.</p>
+                </div>
+              </div>
+
+              <div className="card p-5 bg-[rgba(245,166,35,.05)] border-[rgba(245,166,35,.3)]">
+                <h4 className="text-sm font-semibold text-[var(--tx-1)] mb-2">30-Hour Cache + Re-Scoring</h4>
+                <p className="text-sm text-[var(--tx-2)] leading-relaxed">Evaluation results are cached for 30 hours in <code className="mono text-xs">data/evaluation_cache.json</code>. Automatic re-scoring is triggered if a cached item goes viral (HN points surge &gt;50%) or gains cross-source corroboration before the cache expires.</p>
+              </div>
+            </section>
+
+            {/* ── Stage 4: Production ──────────────────────── */}
+            <section id="production" className="scroll-mt-24">
+              <h2 className="heading-lg mb-4 pb-3 border-b border-[var(--border)] flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border)] mono text-sm font-bold text-[var(--accent)]">04</span>
+                Concurrent Video Production
+              </h2>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-6">
+                The production phase is divided into two concurrency models. First, all script generation (Gemini) and TTS synthesis (Edge TTS) run in parallel for all queued stories simultaneously — all audio files are ready in ~10–15 seconds. Then Remotion renders each video sequentially, pinning 100% of the EC2 CPU cores per render.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                {[
+                  { icon:"✍️", label:"Gemini Scriptwriter",   desc:"8 category-specific prompt templates (update, free_alternative, hidden_gem, productivity, comparison, weekly_roundup, best_for, prompt_trick). Scripts are generated concurrently for all queued stories." },
+                  { icon:"🎙️", label:"Edge TTS Neural Voice",  desc:"Microsoft Azure neural voices with sentence-level timing metadata. Timing data drives exact scene-cut boundaries in the renderer." },
+                  { icon:"🎬", label:"Remotion Multi-Core",    desc:"React video engine. Invokes --concurrency=${os.cpus().length} so every CPU core is pinned during render. Generates 1080×1920 MP4 with spring physics and dynamic timing." },
+                  { icon:"⚙️", label:"Post-LLM Validator",    desc:"Sanitizes Gemini script output. Checks structural integrity, field presence, and enforces the expected timing schema before TTS is called." },
+                ].map(({ icon, label, desc }) => (
+                  <div key={label} className="card p-5">
+                    <div className="text-2xl mb-3">{icon}</div>
+                    <strong className="block text-sm font-semibold text-[var(--tx-1)] mb-1">{label}</strong>
+                    <p className="text-xs text-[var(--tx-2)] leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="code-block text-[var(--tx-2)] text-xs">
+                <pre>{`// Dynamic concurrency — pins ALL available CPU cores
+const concurrency = os.cpus().length;
+await renderMedia({ concurrency, ... });
+
+// Timing example — from actual pipeline performance log
+// Gemini Script :  6.2s  █
+// TTS Voice     :  4.1s  █
+// Remotion      : 58.4s  ████████████████████
+// Total         : 142.0s`}</pre>
+              </div>
+            </section>
+
+            {/* ── Stage 5: Broadcast ───────────────────────── */}
+            <section id="broadcast" className="scroll-mt-24">
+              <h2 className="heading-lg mb-4 pb-3 border-b border-[var(--border)] flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border)] mono text-sm font-bold text-[var(--accent)]">05</span>
+                Triple Broadcast via S3 Bridge
+              </h2>
+              <p className="text-[var(--tx-2)] leading-relaxed mb-6">
+                Once a video is rendered, it takes two upload paths simultaneously. The direct YouTube upload uses the Data API v3 with OAuth 2.0 and 2 MB resumable chunks. For Instagram and Facebook, the video is uploaded once to AWS S3 and a 2-hour presigned URL is generated. Both Meta APIs receive that URL concurrently. As soon as both platforms confirm publication, the S3 object is automatically deleted.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { platform:"YouTube Shorts", method:"OAuth 2.0 Resumable", detail:"2 MB chunked upload. Metadata (title, tags, description) injected dynamically from the script. Private staging, then immediate publication." },
+                  { platform:"Instagram Reels", method:"Meta Graph API",      detail:"REELS media container → async status polling → instant publish. Delivered via the S3 presigned URL bridge." },
+                  { platform:"Facebook Pages", method:"Meta Graph API",       detail:"Page Video endpoint. Asynchronous processing with status verification. Concurrent with Instagram via the same S3 presigned URL." },
+                ].map(({ platform, method, detail }) => (
+                  <div key={platform} className="card p-5 border-t-2 border-t-[var(--green)]">
+                    <h3 className="font-bold text-sm text-[var(--tx-1)] mb-1">{platform}</h3>
+                    <span className="mono text-[10px] text-[var(--tx-3)] block mb-3">{method}</span>
+                    <p className="text-xs text-[var(--tx-2)] leading-relaxed">{detail}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+          </div>
+
+          <PagePager
+            prev={{ href: "/", label: "Home" }}
+            next={{ href: "/journey", label: "Engineering Journey" }}
+          />
+        </article>
+
+        {/* ── Right sticky TOC sidebar — desktop only ────── */}
+        <aside className="hidden lg:block">
+          <TableOfContents items={TOC} />
+        </aside>
+
       </div>
     </div>
   );

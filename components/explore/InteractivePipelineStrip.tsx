@@ -1,167 +1,114 @@
 "use client";
-
 import { useState } from "react";
 
-interface Stage {
-  id: string;
-  step: string;
-  title: string;
-  subtitle: string;
-  summary: string;
-  input: string;
-  mechanism: string;
-  output: string;
-  metric: string;
-}
-
-const STAGES: Stage[] = [
-  {
-    id: "discovery",
-    step: "01",
-    title: "Discovery",
-    subtitle: "4 Live Sources",
-    summary: "Scrapes Hacker News JSON API, official engineering RSS feeds, GitHub Releases REST API, and Product Hunt RSS.",
-    input: "Raw API payloads & RSS XML feeds",
-    mechanism: "Source-specific collectors run concurrently, extracting metadata, timestamps, and engagement signals.",
-    output: "Unstructured candidate pool",
-    metric: "4 independent collectors",
-  },
-  {
-    id: "filtering",
-    step: "02",
-    title: "Signal Gates",
-    subtitle: "Noise Elimination",
-    summary: "Deterministic normalizers, keyword whitelists/blacklists, quality gates, and 14-day recency cutoff.",
-    input: "Raw candidate pool",
-    mechanism: "Strict regex and schema validation discard tutorials, opinion pieces, roundups, and duplicate URLs before LLM invocation.",
-    output: "Normalized, clean candidate set",
-    metric: "14-day staleness cutoff",
-  },
-  {
-    id: "editorial",
-    step: "03",
-    title: "AI Newsroom",
-    subtitle: "Two-Pass Gemini",
-    summary: "Compiles factual evidence, runs Pass 1 Mission Check in chunks of 10, then Pass 2 Relative Ranking (1..N).",
-    input: "Clean candidates + factual evidence",
-    mechanism: "Pass 1 classifies publish/reject with factual justification; Pass 2 establishes strict daily leaderboard with category rotation.",
-    output: "Top 5 editorial queue",
-    metric: "30h cache + viral re-score",
-  },
-  {
-    id: "production",
-    step: "04",
-    title: "Production",
-    subtitle: "100% CPU Render",
-    summary: "Concurrent pre-production (scripts + Azure TTS audio) and multi-core Remotion video rendering.",
-    input: "Selected candidate script",
-    mechanism: "All batch scripts and neural voice synthesized in parallel; Remotion dynamically pins all available CPU cores on EC2.",
-    output: "1080×1920 MP4 with sentence-synced graphics",
-    metric: "100% host CPU cores pinned",
-  },
-  {
-    id: "broadcast",
-    step: "05",
-    title: "Publishing",
-    subtitle: "Triple Relay",
-    summary: "Concurrent broadcast to YouTube Shorts (resumable), Instagram Reels, and Facebook Pages via AWS S3 bridge.",
-    input: "Master MP4 video file",
-    mechanism: "Uploads once to S3 temporary bucket, issues 2h presigned URL to Meta APIs, uploads to YouTube, and deletes S3 asset post-broadcast.",
-    output: "Live public platform URLs",
-    metric: "0 bytes permanent S3 storage",
-  },
+const STAGES = [
+  { id:"discovery", n:"01", title:"Content Discovery",  sub:"4 Independent Streams",
+    icon:"📡",
+    intro:"Runs four independent collectors concurrently — failure in one never blocks the batch.",
+    items:[
+      { name:"Hacker News API",    type:"JSON REST",        desc:"Polls top stories with score & discussion velocity." },
+      { name:"Engineering Blogs",  type:"RSS / Atom",       desc:"Direct feeds from OpenAI, Google DeepMind, Meta, AWS." },
+      { name:"GitHub Releases",    type:"REST API",         desc:"Major version releases from tracked infra repos." },
+      { name:"Product Hunt",       type:"RSS Feed",         desc:"Developer tools, AI infra, and productivity launches." },
+    ],
+    metric:"4 collectors", color:"var(--accent)" },
+  { id:"filtering", n:"02", title:"Signal Gates",        sub:"Zero LLM Tokens Wasted",
+    icon:"🛡️",
+    intro:"Five deterministic hard-gates reject noise before a single Gemini token is spent.",
+    items:[
+      { name:"Normalizer",      type:"Schema",       desc:"Maps all sources into one unified candidate schema." },
+      { name:"Signal Filter",   type:"Keyword Gate", desc:"Whitelists technical news; blacklists tutorials & opinions." },
+      { name:"Quality Gate",    type:"Structural",   desc:"Drops malformed URLs and empty descriptions." },
+      { name:"Deduplicator",    type:"Fuzzy Match",  desc:"Cross-source dedup via canonical URL + title similarity." },
+      { name:"Staleness Gate",  type:"14-Day Cutoff",desc:"Discards anything older than 14 days." },
+    ],
+    metric:"0 LLM tokens pre-filter", color:"var(--green)" },
+  { id:"editorial", n:"03", title:"AI Newsroom",         sub:"Two-Pass Gemini Judgment",
+    icon:"🧠",
+    intro:"Replaces arbitrary point formulas with factual evidence + two sequential Gemini passes.",
+    items:[
+      { name:"Evidence Builder",  type:"Factual",       desc:"Compiles recency, upvotes, source authority, corroboration." },
+      { name:"Pass 1 — Mission Check", type:"Parallel chunks of 10", desc:"Gemini returns publish/reject with cited evidence." },
+      { name:"Pass 2 — Ranking",  type:"Tournament 1..N", desc:"Global strict leaderboard with category diversity rules." },
+      { name:"30-Hour Cache",     type:"Semantic Cache",desc:"Re-scores cached items if engagement surges >50%." },
+    ],
+    metric:"Temp 0.0 · JSON schema enforced", color:"var(--amber)" },
+  { id:"production", n:"04", title:"Video Production",   sub:"100 % CPU Saturation",
+    icon:"⚡",
+    intro:"Concurrent pre-production then multi-core Remotion render — CPU never idles.",
+    items:[
+      { name:"Gemini Scriptwriter", type:"Gen AI",    desc:"Generates punchy 45-60 s video scripts in batch." },
+      { name:"Edge TTS Voice",      type:"Neural TTS",desc:"Microsoft Azure neural voices with sentence-level timing." },
+      { name:"Remotion Renderer",   type:"Multi-Core",desc:"Pins all os.cpus() cores; 1080×1920 MP4 with spring physics." },
+      { name:"Dynamic Timing",      type:"Acoustic",  desc:"Scene cuts derived from TTS audio duration metadata." },
+    ],
+    metric:"os.cpus().length cores pinned", color:"var(--rose)" },
+  { id:"broadcast", n:"05", title:"Triple Broadcast",    sub:"Ephemeral S3 Bridge",
+    icon:"🚀",
+    intro:"Upload once to S3, relay to all platforms via presigned URL, then auto-delete — zero storage cost.",
+    items:[
+      { name:"YouTube Shorts",  type:"OAuth 2.0 Resumable",  desc:"2 MB chunked upload with metadata injection." },
+      { name:"S3 Temp Bridge",  type:"Presigned 2h URL",     desc:"Single upload → Meta-compatible URL → auto-delete." },
+      { name:"Instagram Reels", type:"Meta Graph API",        desc:"Container init → async poll → instant publish." },
+      { name:"Facebook Pages",  type:"Meta Graph API",        desc:"Page Video endpoint with status polling." },
+    ],
+    metric:"0 bytes permanent storage", color:"var(--green)" },
 ];
 
 export default function InteractivePipelineStrip() {
-  const [activeStageId, setActiveStageId] = useState<string>("discovery");
-  const activeStage = STAGES.find((s) => s.id === activeStageId) || STAGES[0];
+  const [active, setActive] = useState("discovery");
+  const stage = STAGES.find(s => s.id === active)!;
 
   return (
-    <div className="space-y-6">
-      {/* 5 Stage Selectors */}
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-5">
-        {STAGES.map((stage) => {
-          const isActive = stage.id === activeStageId;
+    <div className="space-y-5">
+      {/* Stage selector tabs */}
+      <div className="grid grid-cols-5 gap-2">
+        {STAGES.map(s => {
+          const on = s.id === active;
           return (
-            <button
-              key={stage.id}
-              onClick={() => setActiveStageId(stage.id)}
-              className={`flex flex-col text-left rounded-xl border p-4 transition text-xs ${
-                isActive
-                  ? "border-blue-500/80 bg-zinc-900 shadow-md ring-1 ring-blue-500/20"
-                  : "border-zinc-800/80 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-900/70"
-              }`}
-            >
-              <div className="flex items-center justify-between w-full">
-                <span className="font-mono font-bold text-zinc-500">
-                  {stage.step}
-                </span>
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    isActive ? "bg-blue-400" : "bg-zinc-700"
-                  }`}
-                />
-              </div>
-              <span className="mt-2 font-semibold text-zinc-100 text-sm">
-                {stage.title}
-              </span>
-              <span className="text-[11px] text-zinc-400 mt-0.5">
-                {stage.subtitle}
-              </span>
+            <button key={s.id} onClick={() => setActive(s.id)}
+              className={`flex flex-col gap-1 p-3 sm:p-4 rounded-xl border text-left transition-all duration-200 ${
+                on
+                  ? "border-[var(--border-active)] bg-[var(--accent-dim)] shadow-[var(--accent-glow)]"
+                  : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
+              }`}>
+              <span className="mono text-lg sm:text-xl">{s.icon}</span>
+              <span className={`mono text-[10px] font-bold tracking-widest ${on ? "text-[var(--accent)]" : "text-[var(--tx-3)]"}`}>{s.n}</span>
+              <span className={`text-xs font-semibold leading-tight hidden sm:block ${on ? "text-[var(--tx-1)]" : "text-[var(--tx-2)]"}`}>{s.title}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Selected Stage Mechanics Detail */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 backdrop-blur-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-zinc-800/80 pb-4 gap-2">
+      {/* Detail panel */}
+      <div key={active} className="card anim-fade-in p-6 sm:p-8 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b border-[var(--border)]">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-blue-400">
-                STAGE {activeStage.step}
-              </span>
-              <span className="text-zinc-600 font-mono">•</span>
-              <h3 className="text-base font-semibold text-zinc-100">
-                {activeStage.title} — {activeStage.subtitle}
-              </h3>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="mono text-sm font-bold" style={{ color: stage.color }}>STAGE {stage.n}</span>
+              <span className="pill">{stage.sub}</span>
             </div>
-            <p className="mt-1 text-xs text-zinc-400">
-              {activeStage.summary}
-            </p>
+            <h3 className="heading-lg text-[var(--tx-1)]">{stage.title}</h3>
+            <p className="mt-2 text-sm text-[var(--tx-2)] leading-relaxed max-w-lg">{stage.intro}</p>
           </div>
-          <div className="shrink-0 font-mono text-[11px] text-zinc-400 bg-zinc-950 px-3 py-1.5 rounded border border-zinc-800">
-            {activeStage.metric}
+          <div className="shrink-0 mono text-xs border border-[var(--border)] rounded-lg px-3 py-1.5 text-[var(--tx-2)] whitespace-nowrap self-start">
+            {stage.metric}
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3 text-xs">
-          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/70 p-3.5">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-              Input Payload
-            </span>
-            <p className="mt-1.5 text-zinc-300 font-medium leading-relaxed">
-              {activeStage.input}
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/70 p-3.5">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-              Core Mechanism
-            </span>
-            <p className="mt-1.5 text-zinc-300 leading-relaxed">
-              {activeStage.mechanism}
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/70 p-3.5">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-              Output Artifact
-            </span>
-            <p className="mt-1.5 text-zinc-300 font-medium leading-relaxed">
-              {activeStage.output}
-            </p>
-          </div>
+        {/* Subsystem cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {stage.items.map((item, i) => (
+            <div key={item.name}
+              className={`rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 space-y-2 hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-all duration-150 anim-fade-up delay-${i + 1}`}>
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-sm font-semibold text-[var(--tx-1)]">{item.name}</span>
+                <span className="mono text-[9px] border border-[var(--border)] rounded px-1.5 py-0.5 text-[var(--tx-3)] whitespace-nowrap shrink-0">{item.type}</span>
+              </div>
+              <p className="text-xs text-[var(--tx-2)] leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

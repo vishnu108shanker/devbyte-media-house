@@ -1,212 +1,171 @@
 import Link from "next/link";
 import InteractivePipelineStrip from "@/components/explore/InteractivePipelineStrip";
+import { GHIcon, LIIcon, YTIcon } from "@/components/ui/Icons";
+
+/* ── Static data ─────────────────────────────────────────── */
+const STATS = [
+  { value:"4",    label:"Data Sources",       sub:"HN · GitHub · Product Hunt · RSS" },
+  { value:"100%", label:"CPU Saturation",     sub:"All cores pinned on render" },
+  { value:"3",    label:"Platforms",          sub:"YouTube · Instagram · Facebook" },
+  { value:"0 B",  label:"Cloud Storage",      sub:"Ephemeral S3 bridge" },
+];
+
+const CARDS = [
+  { step:"01", title:"What is DEVLAR?",
+    body:"An autonomous media pipeline that discovers developer news, applies two-pass Gemini AI editorial judgment, and renders + uploads short-form videos — hands-free.",
+    href:"/philosophy", cta:"Read the philosophy" },
+  { step:"02", title:"How does the pipeline work?",
+    body:"Five deterministic stages: collect → filter → AI newsroom → render at 100% CPU → simultaneous broadcast to YouTube, Instagram, and Facebook.",
+    href:"/how-it-works", cta:"Explore the architecture" },
+  { step:"03", title:"What technologies power it?",
+    body:"Python collectors, Gemini Flash editorial brain, Edge TTS neural voice, Remotion multi-core renderer, AWS S3 ephemeral bridges, and Next.js + MongoDB Atlas for presentation.",
+    href:"/technology", cta:"Inspect the stack" },
+  { step:"04", title:"How did it evolve?",
+    body:"Started as a GitHub scraper prototype. Grew through 7 architectural milestones into a triple-platform cloud media system deployed on AWS EC2.",
+    href:"/journey", cta:"View the journey" },
+];
 
 export default function HomePage() {
-  const discoveryQuestions = [
-    {
-      step: "01",
-      question: "What is it?",
-      summary: "DEVLAR is an autonomous media system that tracks developer breakthroughs and publishes high-fidelity short-form videos across YouTube, Instagram, and Facebook.",
-      linkText: "Learn about the mission",
-      href: "/philosophy",
-    },
-    {
-      step: "02",
-      question: "How does it work?",
-      summary: "A 5-stage deterministic pipeline collects raw signals, filters noise, applies two-pass AI editorial judgment, and renders videos saturating 100% of CPU cores.",
-      linkText: "Explore pipeline architecture",
-      href: "/how-it-works",
-    },
-    {
-      step: "03",
-      question: "Why was it built this way?",
-      summary: "Built on strict principles: code determines what is allowed, AI determines what is worth publishing, and the presentation tier is decoupled from EC2 compute.",
-      linkText: "Read core principles",
-      href: "/philosophy",
-    },
-    {
-      step: "04",
-      question: "What technologies make it possible?",
-      summary: "Python 3.11 collectors, Google Gemini Flash editorial scoring, Edge TTS neural audio, Remotion 4.x multi-core rendering, and AWS S3 ephemeral bridges.",
-      linkText: "Inspect the stack table",
-      href: "/technology",
-    },
-    {
-      step: "05",
-      question: "What has changed over time?",
-      summary: "Evolved across 7 major milestones from a single-source GitHub scraper into a multi-source, triple-platform autonomous media house.",
-      linkText: "Review engineering journey",
-      href: "/journey",
-    },
-  ];
-
-  const highlights = [
-    { label: "Independent Collectors", value: "4", detail: "HN, GitHub, Product Hunt, RSS" },
-    { label: "Hardware Saturation", value: "100%", detail: "All CPU cores pinned on render" },
-    { label: "Publishing Platforms", value: "3", detail: "YouTube, Instagram, Facebook" },
-    { label: "Permanent S3 Storage", value: "0 B", detail: "Ephemeral presigned asset cleanup" },
-  ];
-
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-20">
-      {/* Brand Hero */}
-      <section className="text-center pt-8 sm:pt-12">
-        <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 font-mono text-xs text-blue-400">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-          <span>DEVLAR · Public Identity of DevByte Media House</span>
+    <div className="overflow-hidden">
+
+      {/* ══ HERO ═══════════════════════════════════════════════ */}
+      <section className="hero-mesh grid-overlay relative min-h-[calc(100dvh-3.5rem)] flex flex-col items-center justify-center text-center px-4 pb-16 pt-20">
+
+        {/* Live badge */}
+        <div className="anim-fade-up pill pill-accent mb-8">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] dot-pulse" />
+          Autonomous Media System · Live on EC2
         </div>
 
-        <h1 className="mt-6 text-5xl font-extrabold tracking-tight sm:text-7xl font-mono text-zinc-100">
-          DEVLAR
+        {/* Headline */}
+        <h1 className="anim-fade-up delay-1 heading-hero mono max-w-4xl">
+          <span className="shimmer-text">DEVLAR</span>
+          <br />
+          <span className="text-[var(--tx-1)]">DevByte Media House</span>
         </h1>
-        <p className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight text-zinc-400 font-mono">
-          DevByte Media House
+
+        {/* Subline */}
+        <p className="anim-fade-up delay-2 mt-6 max-w-2xl text-lg text-[var(--tx-2)] leading-relaxed">
+          An AI-powered pipeline that reads the internet, writes scripts, records neural audio, renders programmatic videos at full CPU speed, and simultaneously publishes to three platforms — entirely without human intervention.
         </p>
 
-        <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-zinc-300 leading-relaxed">
-          An automated media system for discovering, understanding, generating, and publishing technical content.
-        </p>
-
-        {/* Life cycle sequence */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs font-mono text-zinc-400">
-          <span className="text-zinc-200">Discover</span>
-          <span>→</span>
-          <span className="text-zinc-200">Understand</span>
-          <span>→</span>
-          <span className="text-zinc-200">Generate</span>
-          <span>→</span>
-          <span className="text-zinc-200">Publish</span>
+        {/* Flow strip */}
+        <div className="anim-fade-up delay-3 mt-8 flex flex-wrap items-center justify-center gap-2 mono text-xs text-[var(--tx-2)]">
+          {["Discover","Filter","AI Editorial","Render","Broadcast"].map((step, i, arr) => (
+            <span key={step} className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--tx-1)] font-semibold">{step}</span>
+              {i < arr.length - 1 && <span className="text-[var(--accent)]">→</span>}
+            </span>
+          ))}
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/how-it-works"
-            className="rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-500"
-          >
-            How DevByte Works →
+        {/* CTA row */}
+        <div className="anim-fade-up delay-4 mt-10 flex flex-wrap gap-3 justify-center">
+          <Link href="/how-it-works" className="btn btn-primary">
+            How It Works
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
-          <Link
-            href="/journey"
-            className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
-          >
-            The Engineering Journey
-          </Link>
+          <Link href="/journey" className="btn">Engineering Journey</Link>
+          <a href="https://github.com/vishnu108shanker/Devbyte-Engine.git"
+            target="_blank" rel="noopener noreferrer"
+            className="btn btn-ghost flex items-center gap-2">
+            <GHIcon className="h-4 w-4" />Source Code
+          </a>
         </div>
 
-        {/* System metrics strip */}
-        <div className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          {highlights.map((item) => (
-            <div
-              key={item.label}
-              className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 text-center"
-            >
-              <div className="font-mono text-2xl sm:text-3xl font-bold text-blue-400">
-                {item.value}
-              </div>
-              <div className="mt-1 text-xs font-medium text-zinc-200">
-                {item.label}
-              </div>
-              <div className="mt-0.5 text-[11px] text-zinc-500 font-mono">
-                {item.detail}
-              </div>
+        {/* Social pills */}
+        <div className="anim-fade-up delay-5 mt-8 flex flex-wrap items-center justify-center gap-2">
+          {[
+            { href:"https://github.com/vishnu108shanker", label:"GitHub Profile", Icon:GHIcon },
+            { href:"https://www.linkedin.com/in/vishnu-shanker-mishra-0b2403310", label:"LinkedIn", Icon:LIIcon },
+            { href:"https://www.youtube.com/@devlarhq", label:"YouTube Shorts", Icon:YTIcon },
+          ].map(({ href, label, Icon }) => (
+            <a key={label} href={href} target="_blank" rel="noopener noreferrer"
+              aria-label={`${label} (opens in new tab)`}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-xs font-medium text-[var(--tx-1)] hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] hover:-translate-y-0.5 transition-all duration-150">
+              <Icon className="h-4 w-4" />{label}
+            </a>
+          ))}
+        </div>
+
+        {/* Scroll hint */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-[var(--tx-3)]">
+          <span className="mono text-[10px] tracking-widest uppercase">Scroll to explore</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="h-5 w-5 animate-bounce"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </section>
+
+      {/* ══ STATS STRIP ════════════════════════════════════════ */}
+      <section className="border-y border-[var(--border)] bg-[var(--bg-1)]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-[var(--border)]">
+          {STATS.map(({ value, label, sub }) => (
+            <div key={label} className="py-8 px-6 text-center group hover:bg-[var(--surface)] transition-colors duration-200">
+              <div className="mono text-3xl sm:text-4xl font-extrabold text-[var(--accent)] group-hover:text-[var(--accent-bright)] transition-colors">{value}</div>
+              <div className="mt-1 font-semibold text-sm text-[var(--tx-1)]">{label}</div>
+              <div className="mt-0.5 mono text-[11px] text-[var(--tx-3)]">{sub}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Interactive Pipeline Lifecycle */}
-      <section className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-zinc-800 pb-4">
-          <div>
-            <span className="font-mono text-xs uppercase tracking-wider text-blue-400 font-semibold">
-              Interactive System Lifecycle
-            </span>
-            <h2 className="mt-1 text-2xl font-bold text-zinc-100">
-              The 5 Pipeline Stages
-            </h2>
-          </div>
-          <p className="text-xs text-zinc-400 max-w-sm">
-            Select any stage below to inspect its input payload, execution mechanism, and output artifact.
+      {/* ══ INTERACTIVE PIPELINE ════════════════════════════════ */}
+      <section className="py-20 px-4 sm:px-6 mx-auto max-w-7xl">
+        <div className="mb-10">
+          <div className="pill pill-accent mb-4">Interactive Architecture</div>
+          <h2 className="heading-xl text-[var(--tx-1)] max-w-2xl">
+            The 5-Stage Pipeline
+          </h2>
+          <p className="mt-3 text-[var(--tx-2)] max-w-xl">
+            Click any stage to inspect its inputs, mechanisms, and outputs in detail.
           </p>
         </div>
-
         <InteractivePipelineStrip />
       </section>
 
-      {/* Structured Discovery Sequence */}
-      <section className="space-y-6">
-        <div>
-          <span className="font-mono text-xs uppercase tracking-wider text-zinc-500 font-semibold">
-            System Exploration
-          </span>
-          <h2 className="mt-1 text-2xl font-bold text-zinc-100">
-            Understanding the Architecture
-          </h2>
+      {/* ══ DISCOVERY CARDS ════════════════════════════════════ */}
+      <section className="py-20 px-4 sm:px-6 mx-auto max-w-7xl border-t border-[var(--border)]">
+        <div className="mb-10">
+          <div className="pill mb-4">Navigate the Docs</div>
+          <h2 className="heading-xl text-[var(--tx-1)]">Explore the System</h2>
+          <p className="mt-3 text-[var(--tx-2)] max-w-xl">Four core questions — click through to the full documentation page for each.</p>
         </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-          {discoveryQuestions.map((q) => (
-            <div
-              key={q.step}
-              className="flex flex-col justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-5 transition hover:border-zinc-700"
-            >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {CARDS.map(({ step, title, body, href, cta }, i) => (
+            <article key={step}
+              className={`card p-6 sm:p-7 flex flex-col gap-5 anim-fade-up delay-${i + 1}`}>
+              <div className="flex items-start justify-between">
+                <span className="mono text-[10px] font-bold tracking-widest text-[var(--tx-3)]">{step}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="h-4 w-4 text-[var(--tx-3)]"><path d="m9 18 6-6-6-6"/></svg>
+              </div>
               <div>
-                <span className="font-mono text-[10px] font-bold text-zinc-500">
-                  {q.step}
-                </span>
-                <h3 className="mt-2 text-sm font-semibold text-zinc-200">
-                  {q.question}
-                </h3>
-                <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
-                  {q.summary}
-                </p>
+                <h3 className="heading-md text-[var(--tx-1)]">{title}</h3>
+                <p className="mt-2 text-sm text-[var(--tx-2)] leading-relaxed">{body}</p>
               </div>
-
-              <div className="mt-4 pt-3 border-t border-zinc-800/60">
-                <Link
-                  href={q.href}
-                  className="inline-flex items-center gap-1 text-xs font-mono text-blue-400 hover:text-blue-300 transition"
-                >
-                  <span>{q.linkText}</span>
-                  <span>→</span>
-                </Link>
-              </div>
-            </div>
+              <Link href={href}
+                className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-[var(--accent)] hover:text-[var(--accent-bright)] group transition-colors">
+                {cta}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </Link>
+            </article>
           ))}
         </div>
       </section>
 
-      {/* Identity Callout */}
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="max-w-2xl">
-            <span className="font-mono text-xs uppercase tracking-wider text-blue-400 font-semibold">
-              Brand &amp; System Decoupling
-            </span>
-            <h3 className="mt-1 text-xl font-bold text-zinc-100">
-              DEVLAR is the Public Identity of DevByte Media House
-            </h3>
-            <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              DevByte Media House is an evolving automated media system built around technical content discovery, processing, and publication. DEVLAR provides its clean public showcase and operational console, decoupled from backend pipeline execution.
-            </p>
-          </div>
-
-          <div className="shrink-0 flex items-center gap-3">
-            <Link
-              href="/technology"
-              className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
-            >
-              Stack Specification
-            </Link>
-            <Link
-              href="/control"
-              className="rounded-lg bg-zinc-800 px-4 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-700 transition"
-            >
-              Control Center
-            </Link>
+      {/* ══ CTA BAND ════════════════════════════════════════════ */}
+      <section className="border-t border-[var(--border)] bg-[var(--bg-1)] py-20 px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl text-center space-y-6">
+          <h2 className="heading-xl text-[var(--tx-1)]">See It Running Live</h2>
+          <p className="text-[var(--tx-2)]">
+            The pipeline runs autonomously on AWS EC2. The Control Center shows real-time publishing stats and performance telemetry from each batch.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link href="/control" className="btn btn-primary">Open Control Center</Link>
+            <Link href="/how-it-works" className="btn">Read Architecture</Link>
           </div>
         </div>
       </section>
+
     </div>
   );
 }

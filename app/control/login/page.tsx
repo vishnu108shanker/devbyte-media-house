@@ -1,20 +1,18 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function LoginPage() {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+    setError("");
 
     try {
       const res = await fetch("/api/auth", {
@@ -22,96 +20,63 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Authentication failed.");
-        setLoading(false);
-        return;
+      if (res.ok) {
+        router.push("/control");
+        router.refresh();
+      } else {
+        setError("Invalid operator password");
       }
-
-      router.push("/control");
-      router.refresh();
-    } catch {
-      setError("An unexpected network error occurred.");
+    } catch (err) {
+      setError("Authentication failed");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 text-zinc-100">
-      <div className="w-full max-w-sm">
-        {/* Brand Header */}
-        <div className="flex flex-col items-center text-center">
-          <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-md">
-            <Image
-              src="/devlar-icon.png"
-              alt="DEVLAR logo"
-              width={48}
-              height={48}
-              className="h-full w-full object-cover"
-              priority
+    <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md card p-8 sm:p-10 space-y-8">
+        
+        <div className="text-center space-y-3">
+          <div className="mx-auto h-12 w-12 rounded-xl overflow-hidden border border-[var(--border)] shadow-sm">
+            <Image src="/devlar-icon.png" alt="DEVLAR" width={48} height={48} className="object-cover" />
+          </div>
+          <h1 className="heading-lg text-[var(--tx-1)]">Operator Login</h1>
+          <p className="text-sm text-[var(--tx-2)]">Authenticate to access the DEVLAR telemetry dashboard.</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="space-y-2">
+            <label htmlFor="pass" className="mono text-[10px] font-bold tracking-widest text-[var(--tx-3)] uppercase block">Master Password</label>
+            <input
+              id="pass"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--tx-1)] placeholder-[var(--tx-3)] focus:border-[var(--border-active)] focus:outline-none transition-colors"
+              placeholder="••••••••••••"
+              required
             />
           </div>
-          <h1 className="mt-4 font-mono text-xl font-bold tracking-tight text-zinc-100">
-            DEVLAR Control Center
-          </h1>
-          <p className="mt-1 text-xs text-zinc-400 font-mono">
-            DevByte Media House / Operational Console
-          </p>
-        </div>
-
-        {/* Login Card */}
-        <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="password"
-                className="block font-mono text-xs font-medium uppercase tracking-wider text-zinc-400"
-              >
-                Administrator Key
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                required
-                autoFocus
-                className="mt-2 block w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
-              />
+          
+          {error && (
+            <div className="rounded-lg bg-[rgba(243,94,122,0.1)] border border-[var(--rose)] px-3 py-2 text-xs text-[var(--rose)] font-medium">
+              {error}
             </div>
+          )}
 
-            {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
-                {error}
-              </div>
-            )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full btn btn-primary justify-center py-3 text-sm disabled:opacity-50"
+          >
+            {loading ? "Authenticating..." : "Establish Uplink"}
+          </button>
+        </form>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed font-mono"
-            >
-              {loading ? "Authenticating..." : "Access Control Center →"}
-            </button>
-          </form>
-
-          <div className="mt-6 border-t border-zinc-800/80 pt-4 text-center">
-            <Link
-              href="/"
-              className="font-mono text-xs text-zinc-500 hover:text-zinc-300 transition"
-            >
-              ← Return to Explore Home
-            </Link>
-          </div>
+        <div className="text-center mono text-[10px] text-[var(--tx-3)] uppercase tracking-widest">
+          Restricted Access
         </div>
-
-        <p className="mt-6 text-center font-mono text-[11px] text-zinc-600">
-          Single-operator session · Zero client-side credentials
-        </p>
       </div>
     </div>
   );

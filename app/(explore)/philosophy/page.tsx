@@ -1,109 +1,89 @@
-import Link from "next/link";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import PagePager from "@/components/ui/PagePager";
+
+const PRINCIPLES = [
+  {
+    n: "01",
+    title: "DevByte is a media organization, not a content tool.",
+    body: `A content tool produces output. A media organization discovers what is happening in the world, evaluates it editorially, and decides what is worth publishing. DEVLAR is built as the latter. Every architectural decision — the four-source collector, the two-pass editorial engine, the category rotation system — exists because a real newsroom would make the same decisions. The automation is the journalist, not the typewriter.`,
+  },
+  {
+    n: "02",
+    title: "Code determines what is allowed. Gemini determines what is worth publishing.",
+    body: `Hard-coded rules handle the things rules should handle: structural validity, noise removal, deduplication, staleness. The LLM handles the editorial judgment that rules cannot: is this story important enough to be the lead today? The two systems are deliberately non-overlapping. A Gemini hallucination cannot cause a tutorial to pass the signal filter. A blacklisted keyword cannot cause a genuine breakthrough to be discarded by the LLM.`,
+  },
+  {
+    n: "03",
+    title: "Zero UI in the loop.",
+    body: `A pipeline is not autonomous if it requires a human to click 'Approve' before publishing. The system must make its own editorial decisions, handle its own failures, and recover from API errors without human intervention. The only human touchpoint in the current architecture is the initial cron schedule — everything else is automated. The Control Center on this site is an observer dashboard, not an intervention panel.`,
+  },
+  {
+    n: "04",
+    title: "Facts over formatting.",
+    body: `LLMs perform poorly when asked to evaluate content cluttered with HTML tags, CSS classes, and navigation chrome. Before passing any candidate to Gemini, the system strips all markup and renders the content as clean plain text. Gemini reads the article, not the website. This single decision dramatically reduced hallucination rates in Pass 1 evaluation.`,
+  },
+  {
+    n: "05",
+    title: "Stateless execution with decoupled persistence.",
+    body: `The EC2 worker maintains no local state between runs. Each cron trigger is a fresh execution. Candidates, evaluation scores, and publishing records are persisted to PostgreSQL (pipeline truth) and MongoDB Atlas (presentation layer). The pipeline can be restarted, migrated, or replaced without data loss because it never owns its own data — the databases do.`,
+  },
+  {
+    n: "06",
+    title: "Video is just code.",
+    body: `By treating video as a React component tree (Remotion), the visual design of every frame is version-controlled, composable, and debuggable like any other UI. A typography bug is a CSS fix, not an After Effects re-render. Animation timing is a function of audio metadata, not a manually keyframed timeline. This enables the same engineer who wrote the pipeline to also update the visual template without learning a new tool.`,
+  },
+];
 
 export default function PhilosophyPage() {
-  const principles = [
-    {
-      num: "01",
-      title: "Code Determines What Is Allowed. AI Determines What Is Worth Publishing.",
-      summary:
-        "Deterministic algorithms enforce non-negotiable boundaries; probabilistic models evaluate qualitative significance.",
-      detail:
-        "We never ask an LLM to filter by date or parse syntactic schemas. Python normalizers, staleness gates (<14 days), keyword whitelists, and deduplication rules reject noise before a single token is generated. Once candidates pass hard gates, Gemini is tasked with what LLMs do best: editorial synthesis and relative ranking.",
-    },
-    {
-      num: "02",
-      title: "Zero-Idle Hardware Saturation.",
-      summary:
-        "Pin all available host compute during rendering; overlap network I/O so compute never waits on uploads.",
-      detail:
-        "Programmatic video rendering is inherently compute-intensive. DevByte dynamically configures Remotion to saturate 100% of host CPU cores (--concurrency=os.cpus().length). As soon as worker i finishes rendering, it hands off its output to background publishing threads while worker i+1 immediately starts rendering on the CPU.",
-    },
-    {
-      num: "03",
-      title: "Ephemeral Bridges, Permanent Records.",
-      summary:
-        "Temporary cloud assets exist only as long as needed for platform ingestion; historical records are append-only.",
-      detail:
-        "Rather than retaining gigabytes of rendered video files in cloud object storage, DevByte uploads the MP4 once to an Amazon S3 temporary bucket, generates a 2-hour presigned URL for Instagram Reels and Facebook Page ingestion, and deletes the S3 asset immediately upon broadcast acknowledgment. Only permanent execution metadata is retained in the database.",
-    },
-    {
-      num: "04",
-      title: "Total System Decoupling.",
-      summary:
-        "The public presentation tier must never depend on the operational state of the production pipeline.",
-      detail:
-        "DevByte Engine (EC2 + Docker + PostgreSQL) and DEVLAR (Vercel + Next.js + MongoDB Atlas) are independent systems. The website reads from a lightweight presentation archive written once after publishing. If the EC2 instance is powered down for maintenance, the website remains 100% operational with zero degradation.",
-    },
-    {
-      num: "05",
-      title: "Objective Evidence Over Arbitrary Math.",
-      summary:
-        "Replace multi-factor weighted point formulas with factual evidence compilation.",
-      detail:
-        "Composite scoring formulas (e.g. freshness + stars + upvotes = composite score) create an illusion of precision. DevByte compiles objective facts (recency in days, raw community engagement metrics, official newsroom authority, cross-source confirmation) and presents them directly to the AI editorial evaluator to produce defensible, evidence-backed decisions.",
-    },
-  ];
-
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-16">
-      {/* Header */}
-      <div className="max-w-3xl">
-        <span className="font-mono text-xs uppercase tracking-wider text-blue-400 font-semibold">
-          First Principles
-        </span>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl text-zinc-100 font-mono">
-          Core Engineering Philosophy
-        </h1>
-        <p className="mt-4 text-sm sm:text-base text-zinc-400 leading-relaxed">
-          Five core engineering and architectural principles that govern how DEVLAR and DevByte Engine are designed, scaled, and operated.
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-12">
+      <Breadcrumbs />
+
+      <header className="mb-16">
+        <div className="pill pill-accent mb-4">Core Principles</div>
+        <h1 className="heading-xl text-[var(--tx-1)]">Philosophy</h1>
+        <p className="mt-4 text-lg text-[var(--tx-2)] leading-relaxed max-w-2xl">
+          The architectural decisions behind DEVLAR are not arbitrary. They stem from a set of principles about what autonomous media systems should be — and what they shouldn't.
+        </p>
+      </header>
+
+      {/* Mission statement */}
+      <div className="card p-8 mb-14 border-[var(--border-active)] bg-[var(--accent-dim)] text-center">
+        <div className="mono text-[10px] uppercase tracking-widest text-[var(--tx-3)] mb-4">Editorial Mission</div>
+        <p className="text-lg font-medium text-[var(--tx-1)] leading-relaxed italic max-w-2xl mx-auto">
+          "DevByte covers products, releases, tools, developer infrastructure, AI breakthroughs, and major engineering announcements — not essays, tutorials, opinion pieces, or long-form discussions."
         </p>
       </div>
 
-      {/* Principles List */}
+      {/* Principles */}
       <div className="space-y-6">
-        {principles.map((p) => (
-          <div
-            key={p.num}
-            className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-sm transition hover:border-zinc-700"
-          >
-            <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-4 border-b border-zinc-800 pb-5">
-              <div className="flex items-start gap-4">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold border border-zinc-700 bg-zinc-950 text-blue-400">
-                  {p.num}
-                </span>
-                <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-zinc-100">
-                    {p.title}
-                  </h2>
-                  <p className="mt-1 text-xs sm:text-sm font-medium text-blue-400/90 font-mono">
-                    {p.summary}
-                  </p>
-                </div>
+        {PRINCIPLES.map((p) => (
+          <article key={p.n} className="card p-7 hover:-translate-y-0.5 transition-transform duration-200">
+            <div className="flex items-start gap-5">
+              <span className="mono text-2xl font-extrabold text-[var(--border-hover)] shrink-0 mt-0.5">{p.n}</span>
+              <div>
+                <h3 className="heading-md text-[var(--tx-1)] mb-3">{p.title}</h3>
+                <p className="text-sm text-[var(--tx-2)] leading-relaxed">{p.body}</p>
               </div>
             </div>
-
-            <p className="mt-5 text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-4xl">
-              {p.detail}
-            </p>
-          </div>
+          </article>
         ))}
       </div>
 
-      {/* Footer Navigation CTA */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition"
-        >
-          <span>← Return to DEVLAR Home</span>
-        </Link>
-        <Link
-          href="/control"
-          className="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition"
-        >
-          Private Control Center →
-        </Link>
+      {/* The end goal */}
+      <div className="mt-16 rounded-2xl border border-[var(--border)] bg-[var(--bg-1)] p-10 text-center">
+        <div className="mono text-[10px] uppercase tracking-widest text-[var(--tx-3)] mb-5">The Larger Goal</div>
+        <blockquote className="text-xl font-medium text-[var(--tx-1)] leading-relaxed italic max-w-2xl mx-auto mb-6">
+          "To prove that a software engineer can build a media company that operates itself — scaling production infinitely without scaling headcount."
+        </blockquote>
+        <p className="text-sm text-[var(--tx-2)] max-w-xl mx-auto leading-relaxed">
+          YouTube videos are simply the first product. The same underlying discovery and editorial infrastructure could produce journal articles, newsletters, research publications, or social posts. DevByte Media House is the programmable media organization — DevByte Engine is one of its production lines.
+        </p>
       </div>
+
+      <PagePager
+        prev={{ href: "/technology", label: "Technology Stack" }}
+      />
     </div>
   );
 }

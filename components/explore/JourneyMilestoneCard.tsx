@@ -19,62 +19,75 @@ export default function JourneyMilestoneCard({
   milestone: Milestone;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const milestoneId = `milestone-${milestone.version.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
 
   return (
-    <div className="relative group">
-      {/* Timeline Dot */}
-      <div className="absolute -left-[31px] sm:-left-[47px] top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 group-hover:border-blue-500 transition">
-        <div className="h-2 w-2 rounded-full bg-blue-500 group-hover:scale-125 transition" />
+    <div id={milestoneId} className="relative group scroll-mt-24">
+      {/* Timeline Node Dot */}
+      <div className="absolute -left-[31px] sm:-left-[47px] top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--bg-primary)] group-hover:border-blue-500 transition shadow-sm">
+        <div className="h-2 w-2 rounded-full bg-blue-500 group-hover:scale-125 transition-transform" />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <span className="font-mono text-sm font-bold text-blue-400">
+        <span className="font-mono text-sm font-bold text-blue-500 bg-blue-500/10 px-2.5 py-0.5 rounded-lg border border-blue-500/20">
           {milestone.version}
         </span>
-        <span className="text-xs font-mono text-zinc-600">•</span>
-        <span className="text-xs font-mono text-zinc-400">{milestone.date}</span>
+        <span className="text-xs font-mono text-[var(--text-muted)]">•</span>
+        <span className="text-xs font-mono text-[var(--text-muted)] font-medium">
+          {milestone.date}
+        </span>
       </div>
 
-      <h2 className="mt-2 text-xl sm:text-2xl font-bold text-zinc-100">
+      <h3 className="mt-2 text-xl sm:text-2xl font-bold text-[var(--text-primary)] font-mono">
         {milestone.title}
-      </h2>
+      </h3>
 
-      <div className="mt-4 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 backdrop-blur-sm space-y-4">
+      <div className="mt-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-card)] p-5 sm:p-6 backdrop-blur-md space-y-4 shadow-sm transition hover:border-[var(--border-hover)]">
         {/* Problem → Decision → Result Triad */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 text-xs">
-          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/70 p-4">
-            <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-rose-400">
-              01 · Problem
-            </span>
-            <p className="mt-2 text-zinc-300 leading-relaxed">
-              {milestone.problem}
-            </p>
+        <div className="grid grid-cols-1 gap-3.5 md:grid-cols-3 text-xs">
+          {/* Problem */}
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 flex flex-col justify-between">
+            <div>
+              <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-rose-500 flex items-center gap-1">
+                <span>⚠️</span> 01 · Bottleneck
+              </span>
+              <p className="mt-2 text-[var(--text-secondary)] leading-relaxed">
+                {milestone.problem}
+              </p>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/70 p-4">
-            <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-blue-400">
-              02 · Decision
-            </span>
-            <p className="mt-2 text-zinc-300 leading-relaxed">
-              {milestone.decision}
-            </p>
+          {/* Decision */}
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 flex flex-col justify-between">
+            <div>
+              <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-blue-500 flex items-center gap-1">
+                <span>⚙️</span> 02 · Architectural Pivot
+              </span>
+              <p className="mt-2 text-[var(--text-secondary)] leading-relaxed">
+                {milestone.decision}
+              </p>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/70 p-4">
-            <span className="font-mono text-[10px] uppercase font-semibold tracking-wider text-emerald-400">
-              03 · Result
-            </span>
-            <p className="mt-2 text-zinc-300 leading-relaxed">
-              {milestone.result}
-            </p>
+          {/* Result */}
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex flex-col justify-between">
+            <div>
+              <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-emerald-500 flex items-center gap-1">
+                <span>✅</span> 03 · Measured Outcome
+              </span>
+              <p className="mt-2 text-[var(--text-secondary)] leading-relaxed">
+                {milestone.result}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Expandable Deep Dive */}
         {expanded && (
-          <div className="mt-4 border-t border-zinc-800/80 pt-4 text-xs text-zinc-400 leading-relaxed animate-fadeIn">
-            <div className="font-mono text-[11px] text-zinc-300 mb-1 font-semibold">
-              Technical Deep Dive:
+          <div className="mt-4 border-t border-[var(--border-primary)] pt-4 text-xs text-[var(--text-secondary)] leading-relaxed animate-fade-in bg-[var(--bg-subtle)]/50 p-4 rounded-xl">
+            <div className="font-mono text-[11px] text-[var(--text-primary)] mb-1.5 font-bold flex items-center gap-1.5">
+              <span>🔬</span>
+              <span>Engineering Deep-Dive &amp; Lessons:</span>
             </div>
             <p>{milestone.deepDive}</p>
           </div>
@@ -85,7 +98,7 @@ export default function JourneyMilestoneCard({
             {milestone.tech.map((t) => (
               <span
                 key={t}
-                className="rounded bg-zinc-950 px-2 py-0.5 font-mono text-[10px] text-zinc-400 border border-zinc-800"
+                className="rounded-md bg-[var(--bg-surface)] px-2 py-0.5 font-mono text-[10px] text-[var(--text-muted)] border border-[var(--border-primary)]"
               >
                 {t}
               </span>
@@ -94,9 +107,11 @@ export default function JourneyMilestoneCard({
 
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-[11px] font-mono text-blue-400 hover:text-blue-300 transition"
+            type="button"
+            className="inline-flex items-center gap-1 text-[11px] font-mono text-blue-500 hover:text-blue-400 font-semibold transition"
           >
-            {expanded ? "Collapse Details ↑" : "Read Deep Dive ↓"}
+            <span>{expanded ? "Hide Technical Details" : "Read Technical Deep-Dive"}</span>
+            <span>{expanded ? "↑" : "↓"}</span>
           </button>
         </div>
       </div>
